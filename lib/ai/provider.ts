@@ -29,6 +29,30 @@ interface Preset {
   baseUrlEnv: string;
   modelEnv: string;
   defaultModel: string;
+  /** Máy chủ chạy ngay trên máy người dùng thì không cần khoá */
+  keyOptional?: boolean;
+}
+
+/**
+ * Máy chủ mô hình chạy nội bộ (Ollama, LM Studio, llama.cpp…) hầu hết không
+ * kiểm tra khoá. Nhận diện qua host để `custom` trỏ vào localhost cũng được
+ * miễn khoá, không bắt người dùng bịa ra một chuỗi vô nghĩa.
+ */
+function isLocalHost(baseUrl: string): boolean {
+  try {
+    const host = new URL(baseUrl).hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '::1' ||
+      host === '[::1]' ||
+      host === 'host.docker.internal' ||
+      host.endsWith('.local')
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -68,6 +92,27 @@ const PRESETS: Record<string, Preset> = {
     baseUrlEnv: 'MIMO_BASE_URL',
     modelEnv: 'MIMO_MODEL',
     defaultModel: '',
+  },
+  // Ollama chạy trên máy: `ollama serve`, mặc định cổng 11434, không cần khoá.
+  // AI_MODEL bắt buộc, vì tên model tuỳ bạn đã `ollama pull` cái gì.
+  ollama: {
+    kind: 'openai',
+    defaultBaseUrl: 'http://localhost:11434/v1',
+    keyEnv: 'AI_API_KEY',
+    baseUrlEnv: 'AI_BASE_URL',
+    modelEnv: 'AI_MODEL',
+    defaultModel: '',
+    keyOptional: true,
+  },
+  // LM Studio: bật "Local Server", mặc định cổng 1234, cũng không cần khoá.
+  lmstudio: {
+    kind: 'openai',
+    defaultBaseUrl: 'http://localhost:1234/v1',
+    keyEnv: 'AI_API_KEY',
+    baseUrlEnv: 'AI_BASE_URL',
+    modelEnv: 'AI_MODEL',
+    defaultModel: '',
+    keyOptional: true,
   },
   // 任意 OpenAI 兼容端点：AI_BASE_URL / AI_API_KEY / AI_MODEL
   custom: {
@@ -123,7 +168,9 @@ export function resolveProvider(): ProviderResult {
     },
   });
 
-  if (!apiKey) return missing(preset.keyEnv);
+  // Khoá chỉ bắt buộc khi gọi ra dịch vụ ngoài; máy chủ chạy nội bộ thì bỏ qua.
+  const keyNeeded = !preset.keyOptional && !isLocalHost(baseUrl);
+  if (keyNeeded && !apiKey) return missing(preset.keyEnv);
   if (!baseUrl) return missing(preset.baseUrlEnv);
   if (!model) return missing(preset.modelEnv);
 
@@ -204,7 +251,8 @@ export async function* streamChat(opts: StreamChatOptions): AsyncGenerator<strin
     signal,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${provider.apiKey}`,
+      // Máy chủ nội bộ không cần khoá — gửi header rỗng có thể khiến vài bản từ chối
+      ...(provider.apiKey ? { Authorization: `Bearer ${provider.apiKey}` } : {}),
     },
     body: JSON.stringify({
       model: provider.model,

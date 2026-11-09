@@ -96,7 +96,17 @@ DEEPSEEK_API_KEY=sk-xxx
 | `anthropic` | `ANTHROPIC_API_KEY` | `https://api.anthropic.com` | `claude-sonnet-5-5` |
 | `openai` | `OPENAI_API_KEY` | `https://api.openai.com/v1` | `gpt-4o` |
 | `mimo` | `MIMO_API_KEY` + `MIMO_BASE_URL` + `MIMO_MODEL` | — | — |
+| `ollama` | `AI_MODEL`（**不需要 Key**） | `http://localhost:11434/v1` | — |
+| `lmstudio` | `AI_MODEL`（**不需要 Key**） | `http://localhost:1234/v1` | — |
 | `custom` | `AI_API_KEY` + `AI_BASE_URL` + `AI_MODEL` | — | — |
+
+**模型跑在本机时不需要 API Key。** `ollama` / `lmstudio` 两档，以及 `custom` 指向
+localhost / 127.0.0.1 / host.docker.internal / `*.local` 的情况，都会跳过 Key 校验；
+没有 Key 时也不会发 `Authorization` 头（有些本地服务器见到空 Bearer 会直接拒绝）。
+对外部服务则一如既往必须有 Key。
+
+注意：本机地址只在你自己跑 `npm run dev` 或自托管时有效。部署到 Vercel 这类平台后，
+服务器端的 localhost 是那台机器自己，连不到你的电脑。
 
 每档的 `*_BASE_URL` / `*_MODEL` 都能单独覆盖默认值。
 
