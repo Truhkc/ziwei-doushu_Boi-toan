@@ -112,6 +112,27 @@ localhost / 127.0.0.1 / host.docker.internal / `*.local` 的情况，都会跳�
 
 限流：`AI_RATE_LIMIT`（默认 20）、`AI_RATE_WINDOW_SEC`（默认 300）。
 
+### 一个容易踩的坑：`.env.local` 不会覆盖已存在的环境变量
+
+Next.js 读 `.env.local` 时，**进程里已经有的同名变量优先**。如果你的 shell 或容器
+已经导出了 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY` 之类的变量（装过 Claude Code
+的机器很常见），写进 `.env.local` 的值会被忽略，请求会打到你没预期的地址上。
+
+排查：
+
+```bash
+env | grep -iE '^ANTHROPIC|^OPENAI|^DEEPSEEK|^AI_'
+```
+
+有输出就说明那些变量来自环境而不是 `.env.local`。临时覆盖：
+
+```bash
+ANTHROPIC_BASE_URL=http://127.0.0.1:8899 npm run dev
+```
+
+要长期生效，就从 shell 配置里删掉它，或者改用 `AI_PROVIDER=custom` 配一组
+不会撞名的 `AI_BASE_URL` / `AI_API_KEY` / `AI_MODEL`。
+
 ---
 
 ## 四、提示词里有什么
