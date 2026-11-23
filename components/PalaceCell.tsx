@@ -18,6 +18,29 @@ interface PalaceCellProps {
   overlayLabel?: string;
   /** 点击叠加四化 badge 回调 */
   onSiHuaClick?: (starName: string, siHua: string) => void;
+  /** Tên sao đang được chọn — sao đó giữ quầng sáng thay vì nhấp nháy */
+  activeStarName?: string | null;
+}
+
+/**
+ * Lớp quầng sáng theo độ sáng của sao: miếu/vượng toả mạnh, hãm chỉ còn ánh mờ.
+ * Dùng trường `brightness` thô (bright/normal/dim) vì nó đã có sẵn cho mọi sao,
+ * kể cả sao không có `brightnessRaw` 7 bậc.
+ */
+function glowClass(brightness: Star['brightness']): string {
+  if (brightness === 'bright') return 'star-bright';
+  if (brightness === 'dim') return 'star-dim';
+  return 'star-normal';
+}
+
+/**
+ * Lệch pha nhấp nháy theo tên sao, để cả bàn không cùng sáng cùng tối một nhịp.
+ * Băm đơn giản từ tên là đủ: chỉ cần ổn định giữa các lần render.
+ */
+function twinkleDelay(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 97;
+  return `${(h / 97) * 6}s`;
 }
 
 const SIHUA_STYLES: Record<string, string> = {
@@ -57,7 +80,7 @@ const SiHuaBadge = ({
 
 export default function PalaceCell({
   palace, onClick, onStarClick, isSelected, isSanFang, delay = 0,
-  overlayStarSiHua, overlayLabel, onSiHuaClick,
+  overlayStarSiHua, overlayLabel, onSiHuaClick, activeStarName,
 }: PalaceCellProps) {
   const { t, term, ganzhi: fmtGanZhi } = useI18n();
   const { branch, stem, name, stars, daXianAge, isCurrentDaXian, isMingGong, isShenGong } = palace;
@@ -139,10 +162,16 @@ export default function PalaceCell({
               className="flex items-center"
               onClick={e => { e.stopPropagation(); onStarClick?.(star); }}
             >
-              <span className={clsx(
-                'text-[13px] leading-tight font-bold tracking-tight cursor-pointer hover:brightness-125 transition-all',
-                star.brightness === 'bright' ? 'text-amber-300' : star.brightness === 'dim' ? 'text-amber-700/80' : 'text-amber-500',
-              )}>
+              <span
+                className={clsx(
+                  'star-glyph text-[13px] leading-tight font-bold tracking-tight cursor-pointer',
+                  glowClass(star.brightness),
+                  activeStarName === star.name && 'star-active',
+                  star.brightness === 'bright' ? 'text-amber-300' : star.brightness === 'dim' ? 'text-amber-700/80' : 'text-amber-500',
+                )}
+                style={{ animationDelay: twinkleDelay(star.name) }}
+                title={term(star.name)}
+              >
                 {term(star.name)}
               </span>
               {star.siHua && <SiHuaBadge siHua={star.siHua} />}
@@ -168,7 +197,15 @@ export default function PalaceCell({
           {luckyStars.map(s => {
             const overlaySiHua = overlayStarSiHua?.[s.name];
             return (
-              <span key={s.name} className="inline-flex items-center text-[9px] text-sky-500/70 leading-tight">
+              <span
+                key={s.name}
+                className={clsx(
+                  'star-glyph inline-flex items-center text-[9px] text-sky-500/70 leading-tight cursor-pointer',
+                  activeStarName === s.name && 'star-active',
+                )}
+                onClick={e => { e.stopPropagation(); onStarClick?.(s); }}
+                title={term(s.name)}
+              >
                 {term(s.name)}
                 {s.siHua && <SiHuaBadge siHua={s.siHua} />}
                 {overlaySiHua && (
@@ -192,7 +229,15 @@ export default function PalaceCell({
       {shaStars.length > 0 && (
         <div className="flex flex-wrap gap-x-1">
           {shaStars.map(s => (
-            <span key={s.name} className="text-[9px] text-red-500/60 leading-tight">
+            <span
+              key={s.name}
+              className={clsx(
+                'star-glyph text-[9px] text-red-500/60 leading-tight cursor-pointer',
+                activeStarName === s.name && 'star-active',
+              )}
+              onClick={e => { e.stopPropagation(); onStarClick?.(s); }}
+              title={term(s.name)}
+            >
               {term(s.name)}{s.siHua && <SiHuaBadge siHua={s.siHua} />}
             </span>
           ))}

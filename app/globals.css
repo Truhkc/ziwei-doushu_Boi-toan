@@ -300,6 +300,54 @@ body {
 .animate-fade-up { animation: fade-up 0.5s ease forwards; }
 .animate-fade-in { animation: fade-in 0.4s ease forwards; }
 
+/* ─── Tinh diệu trên bàn lá số ─────────────────────────────
+ * Sao sáng (miếu/vượng) toả quầng vàng rõ, sao hãm chỉ còn ánh lạnh mờ —
+ * để nhìn một cái là thấy ngay chỗ nào mạnh chỗ nào yếu, không phải đọc chữ.
+ * Nhấp nháy rất nhẹ và rất chậm: đủ để bàn lá số "sống", không gây rối mắt.
+ */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.82; }
+}
+
+.star-glyph {
+  transition: filter 0.25s ease, transform 0.25s ease, text-shadow 0.25s ease;
+  will-change: opacity;
+}
+
+.star-bright {
+  text-shadow: 0 0 6px rgba(252, 211, 77, 0.55), 0 0 14px rgba(245, 158, 11, 0.3);
+  animation: star-twinkle 5.5s ease-in-out infinite;
+}
+.star-normal {
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.28);
+  animation: star-twinkle 7s ease-in-out infinite;
+}
+.star-dim {
+  text-shadow: 0 0 3px rgba(148, 163, 184, 0.22);
+  animation: star-twinkle 9s ease-in-out infinite;
+}
+
+/* Rê chuột: quầng sáng bung ra, như chạm vào thì sao hưởng ứng */
+.star-glyph:hover {
+  transform: scale(1.12);
+  text-shadow: 0 0 10px rgba(252, 211, 77, 0.9), 0 0 22px rgba(245, 158, 11, 0.55);
+  animation-play-state: paused;
+}
+
+/* Sao đang được chọn: giữ quầng sáng, không nhấp nháy nữa */
+.star-active {
+  transform: scale(1.1);
+  text-shadow: 0 0 12px rgba(252, 211, 77, 0.95), 0 0 26px rgba(245, 158, 11, 0.6);
+  animation-play-state: paused;
+}
+
+/* Tôn trọng người dùng tắt hiệu ứng chuyển động trong hệ điều hành */
+@media (prefers-reduced-motion: reduce) {
+  .star-bright, .star-normal, .star-dim { animation: none; }
+  .star-glyph, .star-glyph:hover, .star-active { transform: none; }
+}
+
 /* ─── 渐变文字（3.0 主标题用） ──────────────────────────── */
 .grad-text {
   -webkit-background-clip: text;

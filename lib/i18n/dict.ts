@@ -225,6 +225,35 @@ export const UI = {
   'form.group.vn': { vi: 'Việt Nam', zh: '越南' },
   'form.group.cn': { vi: 'Trung Quốc', zh: '中国' },
   'form.shichenRange': { vi: '({range})', zh: '（{range}）' },
+
+  // ── Bảng chi tiết tinh diệu ──────────────────────────────
+  'star.type.major': { vi: 'Chính tinh', zh: '主星' },
+  'star.type.lucky': { vi: 'Cát tinh', zh: '吉星' },
+  'star.type.sha': { vi: 'Sát tinh', zh: '煞星' },
+  'star.type.minor': { vi: 'Tạp diệu', zh: '杂星' },
+  'star.tag.element': { vi: 'Ngũ hành · {x}', zh: '五行 · {x}' },
+  'star.tag.nature': { vi: 'Tính chất · {x}', zh: '性质 · {x}' },
+  'star.tag.position': { vi: 'Vị trí · {x}', zh: '位置 · {x}' },
+  'star.tag.bright': { vi: 'Miếu vượng', zh: '庙旺' },
+  'star.tag.dim': { vi: 'Lạc hãm', zh: '落陷' },
+  'star.tag.neutral': { vi: 'Bình hoà', zh: '平和' },
+  'star.section.traits': { vi: 'Đặc chất tinh diệu', zh: '星曜特质' },
+  'star.section.classical': { vi: 'Nguyên văn cổ thư', zh: '古书原文' },
+  'star.section.niReading': { vi: 'Nghê Hải Hạ luận', zh: '倪海厦老师解读' },
+  'star.field.career': { vi: 'Hướng sự nghiệp', zh: '事业方向' },
+  'star.field.relationship': { vi: 'Đặc chất tình cảm', zh: '感情特质' },
+  'star.field.wealth': { vi: 'Phân tích tài vận', zh: '财运分析' },
+  'star.field.health': { vi: 'Lưu ý sức khoẻ', zh: '健康提示' },
+  'star.field.bestPalace': { vi: 'Cung tốt nhất', zh: '最佳宫位' },
+  'star.field.worstPalace': { vi: 'Cung cần lưu ý', zh: '注意宫位' },
+  'star.noDetail': {
+    vi: 'Ngôi sao này chưa có bài luận chi tiết trong kho dữ liệu. Bấm vào cung chứa nó để hỏi AI.',
+    zh: '此星暂无详细论断，可点击所在宫位让 AI 解读。',
+  },
+  'star.proseStillChinese': {
+    vi: 'Phần luận giải dưới đây hiện còn nguyên văn tiếng Trung — chưa dịch.',
+    zh: '',
+  },
 } as const satisfies Record<string, Entry>;
 
 export type UiKey = keyof typeof UI;

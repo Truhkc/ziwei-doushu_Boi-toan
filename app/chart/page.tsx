@@ -4,9 +4,11 @@ import BirthForm from '@/components/BirthForm';
 import { useI18n } from '@/components/LocaleProvider';
 import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
-import TimeNav, { type TimeView } from '@/components/TimeNav';
+import StarDetailPanel from '@/components/StarDetailPanel';
+import StarField from '@/components/StarField';
+import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
-import type { BirthInfo, ZiweiChart, Palace } from '@/lib/ziwei/types';
+import type { BirthInfo, ZiweiChart, Palace, Star } from '@/lib/ziwei/types';
 
 /**
  * 命盘页 —— 开源版「排盘引擎 Demo」
@@ -22,8 +24,12 @@ export default function ChartPage() {
   const { t } = useI18n();
   const [chart, setChart] = useState<ZiweiChart | null>(null);
   const [selectedPalace, setSelectedPalace] = useState<Palace | null>(null);
-  const [view, setView] = useState<TimeView>('mingpan');
-  const [liunianYear, setLiunianYear] = useState(() => new Date().getFullYear());
+  // Bấm vào một ngôi sao → mở bảng chi tiết của nó bên cột phải
+  const [selectedStar, setSelectedStar] = useState<{ star: Star; palaceName: string } | null>(null);
+  // Bấm vào dấu tứ hoá của đại hạn / lưu niên → hỏi AI riêng về phi hoá đó
+  const [selectedSiHua, setSelectedSiHua] = useState<
+    { starName: string; siHua: string; view: TimeView } | null
+  >(null);
 
   // ── 未起盘：展示出生信息表单 ──
   if (!chart) {
@@ -42,10 +48,18 @@ export default function ChartPage() {
 
   // ── 已起盘：命盘 + 解读 ──
   return (
-    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px' }}>
+    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px', position: 'relative' }}>
+      {/* Nền sao nhấp nháy — canvas cố định, không chắn thao tác (pointer-events: none) */}
+      <StarField />
+
       <button
         type="button"
-        onClick={() => { setChart(null); setSelectedPalace(null); }}
+        onClick={() => {
+          setChart(null);
+          setSelectedPalace(null);
+          setSelectedStar(null);
+          setSelectedSiHua(null);
+        }}
         style={{
           marginBottom: 16, padding: '6px 14px', cursor: 'pointer',
           border: '1px solid #ccc', borderRadius: 8, background: 'transparent',
@@ -54,22 +68,34 @@ export default function ChartPage() {
         {t('chart.back')}
       </button>
 
-      <TimeNav
-        chart={chart}
-        view={view}
-        liunianYear={liunianYear}
-        onViewChange={setView}
-        onYearChange={setLiunianYear}
-      />
-
+      {/* ChartBoard tự dựng TimeNav bên trong và tự giữ trạng thái bản mệnh /
+          đại hạn / lưu niên, nên ở đây không dựng thêm một thanh nữa. */}
       <div
         className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)]"
         style={{
-          gap: 20, marginTop: 16, alignItems: 'start',
+          gap: 20, marginTop: 16, alignItems: 'start', position: 'relative', zIndex: 1,
         }}
       >
-        <ChartBoard chart={chart} onPalaceSelect={setSelectedPalace} />
-        <InsightPanel chart={chart} selectedPalace={selectedPalace} />
+        <ChartBoard
+          chart={chart}
+          onPalaceSelect={setSelectedPalace}
+          onStarSelect={(star, palace) => setSelectedStar({ star, palaceName: palace.name })}
+          onSiHuaClick={(starName, siHua, view) => setSelectedSiHua({ starName, siHua, view })}
+          activeStarName={selectedStar?.star.name ?? null}
+        />
+
+        <div className="flex flex-col gap-4">
+          <StarDetailPanel
+            star={selectedStar?.star ?? null}
+            palaceName={selectedStar?.palaceName}
+            onClose={() => setSelectedStar(null)}
+          />
+          <InsightPanel
+            chart={chart}
+            selectedPalace={selectedPalace}
+            selectedSiHua={selectedSiHua}
+          />
+        </div>
       </div>
     </main>
   );

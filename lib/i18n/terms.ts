@@ -146,6 +146,40 @@ export const VI_PATTERNS: Record<string, string> = {
   化禄入财: 'Hoá Lộc Nhập Tài',   化权入官: 'Hoá Quyền Nhập Quan',
 };
 
+/**
+ * Ngũ hành, tính chất và đặc chất của tinh diệu — lấy từ STAR_DESCRIPTIONS
+ * trong lib/ziwei/constants.ts, hiện ở bảng chi tiết sao.
+ */
+export const VI_ELEMENTS: Record<string, string> = {
+  金: 'Kim', 木: 'Mộc', 水: 'Thuỷ', 火: 'Hoả', 土: 'Thổ',
+};
+
+export const VI_STAR_NATURE: Record<string, string> = {
+  吉星: 'Cát tinh',
+  凶星: 'Hung tinh',
+  中性: 'Trung tính',
+  中性偏吉: 'Trung tính thiên cát',
+  凶中带吉: 'Hung trung hữu cát',
+};
+
+/** Đặc chất (keywords) của 14 chính tinh */
+export const VI_STAR_TRAITS: Record<string, string> = {
+  帝王: 'đế vương',   尊贵: 'tôn quý',   独立: 'độc lập',
+  智慧: 'trí tuệ',    机变: 'cơ biến',   谋略: 'mưu lược',
+  阳刚: 'dương cương', 官贵: 'quan quý',  慷慨: 'khảng khái',
+  财富: 'tài phú',    刚毅: 'cương nghị', 果断: 'quả đoán',
+  温和: 'ôn hoà',     享福: 'hưởng phúc', 随缘: 'tuỳ duyên',
+  才艺: 'tài nghệ',   刑囚: 'hình tù',   桃花: 'đào hoa',
+  财库: 'kho tài',    稳重: 'vững vàng',  保守: 'bảo thủ',
+  柔美: 'nhu mỹ',     阴柔: 'âm nhu',
+  欲望: 'dục vọng',   多才: 'đa tài',
+  口舌: 'khẩu thiệt',  是非: 'thị phi',   善辩: 'thiện biện',
+  辅佐: 'phụ tá',     行政: 'hành chính', 印绶: 'ấn thụ',
+  荫护: 'ấm hộ',      医药: 'y dược',    长辈: 'bậc trưởng',
+  将星: 'tướng tinh',  果决: 'quả quyết',  孤克: 'cô khắc',
+  开创: 'khai sáng',   变动: 'biến động',  破坏: 'phá hoại',
+};
+
 /** 星名合表（主星 + 吉星 + 煞星 + 杂曜） */
 export const VI_STARS: Record<string, string> = {
   ...VI_MAJOR_STARS, ...VI_LUCKY_STARS, ...VI_SHA_STARS, ...VI_MINOR_STARS,
@@ -156,6 +190,7 @@ const ALL: Record<string, string> = {
   ...VI_STARS, ...VI_PALACES, ...VI_BRIGHTNESS, ...VI_SIHUA,
   ...VI_STEMS, ...VI_BRANCHES, ...VI_WUXING_JU, ...VI_YINYANG_GENDER,
   ...VI_SHIER_SHEN, ...VI_PATTERNS,
+  ...VI_ELEMENTS, ...VI_STAR_NATURE, ...VI_STAR_TRAITS,
 };
 
 /** 单个专名转汉越音；未收录时原样返回，不吞掉内容 */
