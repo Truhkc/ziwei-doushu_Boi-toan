@@ -20,7 +20,8 @@ export default function StarField() {
     window.addEventListener('resize', resize);
 
     const isLight = theme === 'light';
-    const count = isLight ? 120 : 200;
+    // Thưa hơn bản gốc: tranh thuỷ mặc sống nhờ khoảng trắng, dày sao thành bầu trời khoa học viễn tưởng
+    const count = isLight ? 70 : 130;
 
     type Particle = {
       x: number; y: number; r: number;
@@ -45,8 +46,8 @@ export default function StarField() {
         if (p.alpha <= 0) { p.alpha = 0; p.alphaDir = 1; }
 
         const color = isLight
-          ? `rgba(160, 110, 20, ${p.alpha})`   // 亮色: 金色尘埃
-          : `rgba(200, 220, 255, ${p.alpha})`;  // 暗色: 蓝白星光
+          ? `rgba(90, 78, 58, ${p.alpha * 0.55})`    // Sáng: bụi mực trên giấy
+          : `rgba(226, 222, 206, ${p.alpha * 0.7})`;  // Tối: ánh ngà, không phải xanh trắng
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -67,7 +68,7 @@ export default function StarField() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: theme === 'light' ? 0.3 : 0.6 }}
+      style={{ opacity: theme === 'light' ? 0.22 : 0.45 }}
     />
   );
 }

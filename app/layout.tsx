@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { LocaleProvider } from '@/components/LocaleProvider';
 import LocaleToggle from '@/components/LocaleToggle';
+import ThemeOrbToggle from '@/components/ThemeOrbToggle';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_URL } from '@/lib/site';
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <LocaleProvider>
             {children}
+            <ThemeOrbToggle />
             <LocaleToggle />
           </LocaleProvider>
         </ThemeProvider>

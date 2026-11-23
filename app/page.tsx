@@ -5,6 +5,7 @@ import type { Locale } from '@/lib/i18n/terms';
 import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
 import StarField from '@/components/StarField';
+import InkMountains from '@/components/InkMountains';
 import { useTheme, type Theme } from '@/components/ThemeProvider';
 
 // ─── 滚动入场 wrapper ────────────────────────────────────
@@ -33,51 +34,6 @@ function WeakBoundary({ line }: { line: string }) {
   return (
     <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
       style={{ background: `linear-gradient(to bottom, ${line}, transparent)`, opacity: 0.45 }} />
-  );
-}
-
-// ─── 主题切换按钮 ────────────────────────────────────────
-function ThemeToggle() {
-  const { t } = useI18n();
-  const { theme, toggle } = useTheme();
-  const isDark = theme === 'dark';
-  return (
-    <motion.button
-      onClick={toggle}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.93 }}
-      aria-label={isDark ? t('common.theme.toLight') : t('common.theme.toDark')}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
-      style={{
-        borderColor: isDark ? 'rgba(212,168,67,0.3)' : 'rgba(140,100,20,0.35)',
-        background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,252,242,0.85)',
-        transition: 'background 0.35s ease, border-color 0.35s ease',
-      }}
-    >
-      <div className="relative w-10 h-5 rounded-full flex-shrink-0"
-        style={{
-          background: isDark ? 'rgba(12,24,64,0.95)' : 'rgba(230,195,80,0.55)',
-          transition: 'background 0.35s ease',
-        }}>
-        <motion.div
-          animate={{ x: isDark ? 2 : 22 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-          className="absolute top-1 w-3.5 h-3.5 rounded-full"
-          style={{
-            background: isDark
-              ? 'linear-gradient(135deg, #b8a050, #e8d090)'
-              : 'linear-gradient(135deg, #e89010, #f8d050)',
-          }}
-        />
-      </div>
-      <span className="text-[11px] font-medium tracking-wide select-none"
-        style={{
-          color: isDark ? 'rgba(212,180,100,0.85)' : 'rgba(110,72,8,0.8)',
-          transition: 'color 0.35s ease',
-        }}>
-        {isDark ? t('common.theme.dark') : t('common.theme.light')}
-      </span>
-    </motion.button>
   );
 }
 
@@ -315,52 +271,57 @@ const NI_TEACHINGS: Record<Locale, typeof NI_TEACHINGS_VI> = { vi: NI_TEACHINGS_
 // ─── 主题色彩 helper ─────────────────────────────────────
 function useColors(theme: Theme) {
   const d = theme === 'dark';
+  /**
+   * Bảng màu thuỷ mặc.
+   *
+   * Tối  = mực nho trên lụa: đen ngả rêu chứ không ngả xanh biển (nền cũ
+   *        #020810 đọc ra "khoa học viễn tưởng", không ra tranh thuỷ mặc).
+   * Sáng = giấy tuyên ngả vàng, chữ mực, nhấn giả thạch.
+   * Vàng kim hạ xuống thành nhũ trầm; chỉ chu sa (dấu triện) được phép rực.
+   */
   return {
-    bgBase:       d ? '#020810'                                : '#f5efe0',
-    // nav 用与 bgBase 完全相同的不透明色，避免半透明叠加产生色差带
-    navBg:        d ? '#020810'                                : '#f5efe0',
-    navBorder:    d ? 'rgba(255,255,255,0.05)'                : 'rgba(160,120,30,0.15)',
-    goldGrad:     d ? 'linear-gradient(160deg,#c8993a 0%,#f0d070 40%,#c8993a 70%,#f0c755 100%)'
-                    : 'linear-gradient(160deg,#6a4206 0%,#9a6a10 40%,#6a4206 70%,#885010 100%)',
-    goldSolid:    d ? '#d4a843'                               : '#8b6410',
-    goldLine:     d ? 'rgba(212,168,67,0.4)'                  : 'rgba(140,100,20,0.4)',
-    tagText:      d ? 'rgba(212,168,67,0.6)'                  : 'rgba(120,80,10,0.65)',
-    // 亮色文字用冷灰系（A 方案核心）：暖底 + 冷字 → 视觉不审美疲劳
-    textPrimary:  d ? '#e8eef6'                               : '#1a1d24',
-    textSecond:   d ? '#b8c6df'                               : '#3a3f4a',
-    textMuted:    d ? '#9db0d0'                               : '#5a6275',
-    textFaint:    d ? 'rgba(240,246,255,0.56)'                : '#9da4b3',
-    // 冷色 accent（B 方案核心）：呼应暗色 quan 蓝；用于装饰性 glow / 链接 / 高亮
-    accent:       d ? '#3a78d4'                               : '#3a5a82',
-    accentSoft:   d ? 'rgba(58,120,212,0.18)'                 : 'rgba(58,90,130,0.10)',
-    cardBg:       d ? 'rgba(255,255,255,0.05)'                : 'rgba(255,255,255,0.88)',
-    cardBorder:   d ? 'rgba(255,255,255,0.10)'                : 'rgba(200,160,60,0.25)',
-    cardShadow:   d ? '0 4px 32px rgba(0,0,0,0.5)'           : '0 4px 24px rgba(140,100,20,0.12)',
-    featureBg:    d ? 'rgba(255,255,255,0.04)'                : 'rgba(255,255,255,0.75)',
-    featureBord:  d ? 'rgba(255,255,255,0.08)'                : 'rgba(200,160,60,0.2)',
-    glowTint:     d ? 'rgba(212,168,67,0.07)'                 : 'rgba(180,140,40,0.06)',
-    // 亮色 glow 真用蓝/紫——给整体氛围加冷色点缀
-    glowBlue:     d ? 'rgba(40,80,160,0.12)'                  : 'rgba(58,90,130,0.06)',
-    glowPurple:   d ? 'rgba(120,50,180,0.08)'                 : 'rgba(96,80,140,0.04)',
-    niBg:         d ? 'rgba(255,255,255,0.04)'                : 'rgba(255,255,255,0.8)',
-    niBorder:     d ? 'rgba(212,168,67,0.2)'                  : 'rgba(180,130,40,0.25)',
-    niDivider:    d ? 'rgba(255,255,255,0.08)'                : 'rgba(180,130,40,0.12)',
-    niCardBg:     d ? 'rgba(255,255,255,0.04)'                : 'rgba(255,255,255,0.9)',
-    niCardBord:   d ? 'rgba(255,255,255,0.08)'                : 'rgba(200,160,60,0.2)',
-    niCardShadow: d ? '0 2px 20px rgba(0,0,0,0.4)'           : '0 2px 16px rgba(140,100,20,0.1)',
-    starBg:       d ? 'rgba(255,255,255,0.04)'                : 'rgba(255,255,255,0.7)',
-    starBorder:   d ? 'rgba(212,168,67,0.22)'                 : 'rgba(160,120,30,0.3)',
-    starText:     d ? 'rgba(212,168,67,0.7)'                  : 'rgba(120,80,10,0.7)',
-    ctaBg:        d ? 'linear-gradient(135deg,#b8892a,#f0d070,#b8892a)'
-                    : 'linear-gradient(135deg,#6a4206,#9a6810,#6a4206)',
-    ctaText:      d ? '#08080a'                               : '#f8f3e8',
-    footerText:   d ? 'rgba(255,255,255,0.08)'                : '#d0b878',
-    scrollLine:   d ? 'rgba(212,168,67,0.3)'                  : 'rgba(140,100,20,0.3)',
-    scrollText:   d ? 'rgba(255,255,255,0.12)'                : '#c0a870',
-    altSection:   d ? 'rgba(255,255,255,0.02)'                : 'rgba(255,255,255,0.4)',
-    quoteBg:      d ? 'rgba(212,168,67,0.04)'                 : 'rgba(255,255,255,0.9)',
+    bgBase:       d ? '#0C0E0C'                                : '#F3EEE3',
+    navBg:        d ? '#0C0E0C'                                : '#F3EEE3',
+    navBorder:    d ? 'rgba(239,233,220,0.06)'                 : 'rgba(20,17,13,0.10)',
+    goldGrad:     d ? 'linear-gradient(160deg,#9A7B40 0%,#D8BC7E 42%,#A8894A 72%,#C2A05A 100%)'
+                    : 'linear-gradient(160deg,#4A3A1E 0%,#8A6B35 42%,#5A4624 72%,#7A5F2E 100%)',
+    goldSolid:    d ? '#C2A05A'                                : '#7A5F2E',
+    goldLine:     d ? 'rgba(194,160,90,0.34)'                  : 'rgba(122,95,46,0.34)',
+    tagText:      d ? 'rgba(194,160,90,0.58)'                  : 'rgba(90,70,36,0.66)',
+    textPrimary:  d ? '#E8E2D4'                                : '#221E18',
+    textSecond:   d ? '#BDB5A4'                                : '#4A4238',
+    textMuted:    d ? '#A49C8B'                                : '#6B6356',
+    textFaint:    d ? 'rgba(232,226,212,0.46)'                 : '#99907F',
+    accent:       d ? '#6E8E86'                                : '#4A6B62',
+    accentSoft:   d ? 'rgba(110,142,134,0.16)'                 : 'rgba(74,107,98,0.10)',
+    cardBg:       d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.86)',
+    cardBorder:   d ? 'rgba(239,233,220,0.09)'                 : 'rgba(20,17,13,0.12)',
+    cardShadow:   d ? '0 4px 32px rgba(0,0,0,0.45)'            : '0 4px 24px rgba(20,17,13,0.08)',
+    featureBg:    d ? 'rgba(239,233,220,0.03)'                 : 'rgba(251,247,238,0.72)',
+    featureBord:  d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    glowTint:     d ? 'rgba(194,160,90,0.055)'                 : 'rgba(154,123,64,0.05)',
+    glowBlue:     d ? 'rgba(110,142,134,0.09)'                 : 'rgba(74,107,98,0.05)',
+    glowPurple:   d ? 'rgba(90,80,70,0.07)'                    : 'rgba(120,100,80,0.035)',
+    niBg:         d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.8)',
+    niBorder:     d ? 'rgba(194,160,90,0.18)'                  : 'rgba(122,95,46,0.22)',
+    niDivider:    d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    niCardBg:     d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.88)',
+    niCardBord:   d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    niCardShadow: d ? '0 2px 20px rgba(0,0,0,0.38)'            : '0 2px 16px rgba(20,17,13,0.07)',
+    starBg:       d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.7)',
+    starBorder:   d ? 'rgba(194,160,90,0.2)'                   : 'rgba(122,95,46,0.26)',
+    starText:     d ? 'rgba(194,160,90,0.72)'                  : 'rgba(90,70,36,0.72)',
+    ctaBg:        d ? 'linear-gradient(135deg,#8A6F38,#C2A05A,#8A6F38)'
+                    : 'linear-gradient(135deg,#4A3A1E,#7A5F2E,#4A3A1E)',
+    ctaText:      d ? '#0C0E0C'                                : '#F7F2E6',
+    footerText:   d ? 'rgba(239,233,220,0.10)'                 : '#B9A478',
+    scrollLine:   d ? 'rgba(194,160,90,0.26)'                  : 'rgba(122,95,46,0.26)',
+    scrollText:   d ? 'rgba(239,233,220,0.14)'                 : '#AE9B74',
+    altSection:   d ? 'rgba(239,233,220,0.018)'                : 'rgba(251,247,238,0.4)',
+    quoteBg:      d ? 'rgba(194,160,90,0.035)'                 : 'rgba(251,247,238,0.9)',
   };
 }
+
 
 // ─── 四化简介数据 ─────────────────────────────────────────
 const SIHUA_BRIEF_VI: Record<string, { attr: string; brief: string }> = {
@@ -732,7 +693,6 @@ export default function HomePage() {
           {t('home.nav.brand')}
         </div>
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <ThemeToggle />
           <motion.button
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
             onClick={() => router.push('/heming')}
@@ -752,6 +712,8 @@ export default function HomePage() {
 
       {/* ══ HERO ══════════════════════════════════════════ */}
       <section ref={heroRef} className="relative min-h-[82svh] lg:min-h-[92vh] flex flex-col items-center justify-center px-6 z-10 pb-24 pt-10">
+        {/* Viễn sơn khép chân màn hero */}
+        <InkMountains height={360} />
         <motion.div style={{ y: heroY, opacity: heroOpacity, maxWidth: '960px' }} className="text-center w-full mx-auto mt-10">
           {/* 标签行 */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -769,7 +731,7 @@ export default function HomePage() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ position: 'relative', display: 'inline-block' }}>
             <h1
-              className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold leading-none mb-5`}
+              className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold leading-none mb-5`}
               style={{
                 fontSize: 'clamp(56px, 10vw, 124px)',
                 letterSpacing: '0.07em',
@@ -871,7 +833,7 @@ export default function HomePage() {
             <motion.p
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.45 }}
-              className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold`}
+              className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold`}
               style={{ fontSize: 'clamp(24px, 3.4vw, 48px)', letterSpacing: '0.05em', lineHeight: 1.35 }}>
               {t('home.scroll.end')}
             </motion.p>
@@ -1008,7 +970,7 @@ export default function HomePage() {
                     </div>
                   </FadeIn>
                   <FadeIn delay={0.1}>
-                    <h2 className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold leading-tight mb-5 tracking-tight`}
+                    <h2 className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold leading-tight mb-5 tracking-tight`}
                       style={{
                         fontSize: i < 2 ? 'clamp(36px, 4vw, 56px)' : 'clamp(30px, 3.5vw, 48px)',
                         whiteSpace: 'pre-line',
@@ -1062,7 +1024,7 @@ export default function HomePage() {
                 <span className="text-[10px] tracking-[0.5em] uppercase" style={{ color: c.tagText }}>Ni Haixia · Philosophy</span>
                 <div className="h-px w-12" style={{ background: `linear-gradient(to left, transparent, ${c.goldLine})` }} />
               </div>
-              <h2 className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-5 tracking-tight`}
+              <h2 className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-5 tracking-tight`}
                 style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>
                 {t('home.trio.title')}
               </h2>
@@ -1125,7 +1087,7 @@ export default function HomePage() {
                 <span className="text-[10px] tracking-[0.5em] uppercase" style={{ color: c.tagText }}>Master · 1953 – 2012</span>
                 <div className="h-px w-12" style={{ background: `linear-gradient(to left, transparent, ${c.goldLine})` }} />
               </div>
-              <h2 className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-6 tracking-tight`}
+              <h2 className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-6 tracking-tight`}
                 style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>
                 {BIO[locale].title}
               </h2>
@@ -1201,7 +1163,7 @@ export default function HomePage() {
                 <span className="text-[10px] tracking-[0.5em] uppercase" style={{ color: c.tagText }}>Compatibility · Analysis</span>
                 <div className="h-px w-8" style={{ background: c.goldLine }} />
               </div>
-              <h2 className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-4 tracking-tight`}
+              <h2 className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-4 tracking-tight`}
                 style={{ fontSize: 'clamp(26px, 3.5vw, 40px)' }}>
                 {t('home.heming.title')}
               </h2>
@@ -1242,7 +1204,7 @@ export default function HomePage() {
       <section className="relative z-10 py-40 px-6 text-center" style={{ background: c.altSection }}>
         <FadeIn>
           <p className="text-[10px] tracking-[0.6em] uppercase mb-6" style={{ color: c.tagText }}>{t('home.final.tag')}</p>
-          <h2 className={`grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-8 tracking-tight leading-tight`}
+          <h2 className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold mb-8 tracking-tight leading-tight`}
             style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}>
             {t('home.final.title1')}<br />{t('home.final.title2')}
           </h2>

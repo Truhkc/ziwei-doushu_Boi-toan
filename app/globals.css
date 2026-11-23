@@ -7,37 +7,42 @@
   /* 字体 */
   --font: -apple-system, 'PingFang SC', 'Helvetica Neue', 'Segoe UI', sans-serif;
   --font-mono: 'SF Mono', 'Menlo', 'Noto Sans Mono', 'Consolas', monospace;
+  /* Chữ nhan đề: có chân, gợi nét bút lông. Xếp nhiều họ để chữ Việt có dấu,
+     chữ Hán và chữ Latin đều tìm được glyph mà không phải tải font ngoài. */
+  --font-display: 'Noto Serif', 'Songti SC', 'STSong', 'Times New Roman', Georgia, serif;
 
-  /* 背景层级 */
-  --bg-0: #FAFAF9;
-  --bg-1: #F4F3EF;
-  --bg-2: #ECEAE4;
-  --bg-inv: #0D0D0B;
+  /* ─── Sáng: giấy tuyên đã ngả vàng ─── */
+  --bg-0: #F3EEE3;
+  --bg-1: #EDE6D8;
+  --bg-2: #E4DBC9;
+  --bg-inv: #14110D;
 
-  /* 文字层级 */
-  --tx-0: #0D0D0B;
-  --tx-1: #1A1A18;
-  --tx-2: #4A4A45;
-  --tx-3: #8A8A82;
-  --tx-inv: #F0EDE8;
-  --tx-inv2: rgba(240,237,232,0.65);
+  /* Chữ: mực đậm → mực loãng */
+  --tx-0: #14110D;
+  --tx-1: #221E18;
+  --tx-2: #51493D;
+  --tx-3: #8C8375;
+  --tx-inv: #EFE9DC;
+  --tx-inv2: rgba(239,233,220,0.65);
 
-  /* 唯一强调色：墨金 */
-  --ac:     #B8922A;
-  --ac-dim: #7A5F1A;
-  --ac-bg:  rgba(184,146,42,0.07);
-  --ac-bdr: rgba(184,146,42,0.22);
+  /* Nhấn: giả thạch (ochre), trầm hơn vàng kim */
+  --ac:     #9A7B40;
+  --ac-dim: #6B5428;
+  --ac-bg:  rgba(154,123,64,0.08);
+  --ac-bdr: rgba(154,123,64,0.24);
+  /* Chu sa — dùng cho dấu triện, điểm xuyết rất tiết chế */
+  --seal:   #A6412E;
 
-  /* 四化语义色（仅用于命盘数据，不用于UI装饰） */
-  --lu:   #2D7A4A;
-  --quan: #1A56A8;
-  --ke:   #8A7018;
-  --ji:   #A83228;
+  /* Tứ hoá: theo màu khoáng chất cổ, không dùng màu neon */
+  --lu:   #3F7A58;
+  --quan: #33548C;
+  --ke:   #8A6B22;
+  --ji:   #A6412E;
 
   /* 边框 */
-  --bdr:      rgba(0,0,0,0.07);
-  --bdr-med:  rgba(0,0,0,0.11);
-  --bdr-heavy:rgba(0,0,0,0.18);
+  --bdr:      rgba(20,17,13,0.10);
+  --bdr-med:  rgba(20,17,13,0.16);
+  --bdr-heavy:rgba(20,17,13,0.26);
 
   /* 阴影 */
   --sh-xs: 0 1px 2px rgba(0,0,0,0.05);
@@ -46,8 +51,8 @@
   --sh-lg: 0 12px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
 
   /* 卡片/内容块背景 */
-  --bg-card: #FFFFFF;
-  --bg-page: #fbf6e8;
+  --bg-card: #FBF7EE;
+  --bg-page: #F3EEE3;
 
   /* 圆角 */
   --r-xs:  4px;
@@ -60,34 +65,43 @@
 
 /* ─── 暗色模式 Token 覆盖 ──────────────────────────────── */
 [data-theme="dark"] {
-  --bg-0: #020810;
-  --bg-1: #0a1020;
-  --bg-2: #141e30;
-  --bg-inv: #f0ede8;
+  /* ─── Tối: mực nho trên lụa, ngả xanh rêu chứ không ngả xanh biển.
+     Nền cũ #020810 đọc ra "vũ trụ khoa học viễn tưởng"; mực thật hơi ấm. ─── */
+  --bg-0: #0C0E0C;
+  --bg-1: #141714;
+  --bg-2: #1E221E;
+  --bg-inv: #EFE9DC;
 
-  --tx-0: #e8eef6;
-  --tx-1: #dce4f0;
-  --tx-2: #9db0d0;
-  --tx-3: #6a7a96;
-  --tx-inv: #0d0d0b;
-  --tx-inv2: rgba(13,13,11,0.65);
+  --tx-0: #E8E2D4;
+  --tx-1: #DAD3C3;
+  --tx-2: #A49C8B;
+  --tx-3: #6E675B;
+  --tx-inv: #14110D;
+  --tx-inv2: rgba(20,17,13,0.65);
 
-  --ac:     #d4a843;
-  --ac-dim: #e8c060;
-  --ac-bg:  rgba(212,168,67,0.10);
-  --ac-bdr: rgba(212,168,67,0.25);
+  /* Vàng trầm như nhũ trên giấy cũ, không chói */
+  --ac:     #C2A05A;
+  --ac-dim: #D8BC7E;
+  --ac-bg:  rgba(194,160,90,0.10);
+  --ac-bdr: rgba(194,160,90,0.26);
+  --seal:   #C0523C;
 
-  --bdr:      rgba(255,255,255,0.07);
-  --bdr-med:  rgba(255,255,255,0.12);
-  --bdr-heavy:rgba(255,255,255,0.20);
+  --lu:   #6FA98A;
+  --quan: #7A9BC9;
+  --ke:   #D4B261;
+  --ji:   #C96A52;
+
+  --bdr:      rgba(239,233,220,0.08);
+  --bdr-med:  rgba(239,233,220,0.14);
+  --bdr-heavy:rgba(239,233,220,0.22);
 
   --sh-xs: 0 1px 2px rgba(0,0,0,0.3);
   --sh-sm: 0 2px 8px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
   --sh-md: 0 4px 20px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.35);
   --sh-lg: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
 
-  --bg-card: rgba(255,255,255,0.04);
-  --bg-page: #020810;
+  --bg-card: rgba(239,233,220,0.035);
+  --bg-page: #0C0E0C;
 }
 
 /* ─── 全局基础 ───────────────────────────────────────────── */
@@ -105,6 +119,172 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+}
+
+/* ═══ Chất liệu thuỷ mặc ═══════════════════════════════════
+ * Hai lớp phủ toàn trang, đều không bắt chuột:
+ *   ::before — thớ giấy, nhiễu SVG rất mịn, để nền không phẳng lì như màn hình
+ *   ::after  — mực loang, vài vệt tròn lớn mờ, trôi cực chậm
+ * Đặt ở body nên mọi trang đều có, không phải nhớ gắn vào từng trang.
+ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Thớ giấy */
+body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] body::before {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+}
+
+/* Mực loang — bút lông chấm nước, loang ra rồi nhạt dần */
+body::after {
+  background:
+    radial-gradient(42% 34% at 16% 22%, rgba(20,17,13,0.085), transparent 70%),
+    radial-gradient(38% 30% at 84% 34%, rgba(20,17,13,0.06),  transparent 72%),
+    radial-gradient(52% 40% at 50% 92%, rgba(20,17,13,0.075), transparent 74%);
+  animation: ink-drift 54s ease-in-out infinite alternate;
+}
+[data-theme="dark"] body::after {
+  background:
+    radial-gradient(46% 36% at 18% 20%, rgba(176,196,180,0.055), transparent 70%),
+    radial-gradient(40% 32% at 82% 36%, rgba(194,160,90,0.045),  transparent 72%),
+    radial-gradient(56% 42% at 48% 94%, rgba(150,170,160,0.05),  transparent 74%);
+}
+
+@keyframes ink-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-1.5%, 1.2%, 0) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
+}
+
+/* Nội dung luôn nổi trên hai lớp nền */
+body > * { position: relative; z-index: 1; }
+
+/* ─── Nhan đề kiểu bút lông ─────────────────────────────── */
+.ink-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* Vạch ngăn kiểu nét bút: đậm giữa, tan hai đầu */
+.ink-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(to right, transparent, var(--ac-bdr) 18%, var(--ac-bdr) 82%, transparent);
+  opacity: 0.8;
+}
+
+/* Sương vắt ngang sườn viễn sơn — hai dải trôi ngược chiều, rất chậm */
+@keyframes ink-mist-drift {
+  from { transform: translateX(-5%); }
+  to   { transform: translateX(5%); }
+}
+.ink-mist {
+  animation: ink-mist-drift 38s ease-in-out infinite alternate;
+}
+.ink-mist-slow {
+  animation-duration: 61s;
+  animation-direction: alternate-reverse;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-mist { animation: none; }
+}
+
+/* ═══ Chuyển cảnh trăng ↔ mặt trời ═════════════════════════
+ * Quầng sáng nở ra từ đúng chỗ người dùng bấm rồi tan. Đi sang nền sáng là
+ * bình minh (hồng cam), về nền tối là hoàng hôn (chàm tím). Lớp này chỉ để
+ * nhìn: không bắt chuột, không nằm trong luồng đọc màn hình.
+ */
+.scene-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  animation: scene-bloom 900ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  transform-origin: var(--wipe-x) var(--wipe-y);
+}
+
+.scene-wipe-dawn {
+  background: radial-gradient(
+    circle at var(--wipe-x) var(--wipe-y),
+    rgba(255, 236, 196, 0.92) 0%,
+    rgba(246, 196, 128, 0.55) 26%,
+    rgba(214, 158, 102, 0.22) 48%,
+    transparent 70%
+  );
+}
+
+.scene-wipe-dusk {
+  background: radial-gradient(
+    circle at var(--wipe-x) var(--wipe-y),
+    rgba(42, 48, 74, 0.92) 0%,
+    rgba(58, 54, 92, 0.6) 26%,
+    rgba(30, 32, 48, 0.26) 48%,
+    transparent 70%
+  );
+}
+
+@keyframes scene-bloom {
+  0%   { opacity: 0; transform: scale(0.08); }
+  22%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-wipe { display: none; }
+}
+
+/* Gợn sóng trên mặt nước: lan rộng, dẹt dần rồi tan */
+@keyframes ink-ripple-out {
+  0%   { transform: scale(1);  opacity: 0.5; }
+  70%  { opacity: 0.16; }
+  100% { transform: scale(13); opacity: 0; }
+}
+.ink-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ink-ripple-out 2.6s cubic-bezier(0.16, 0.8, 0.3, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-ripple { display: none; }
+}
+
+/* Thiên thể trên nút: trăng khuyết ↔ mặt trời, xoay khi đổi */
+.orb-body {
+  transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              background 700ms ease, box-shadow 700ms ease;
+}
+.orb-ray {
+  transition: opacity 500ms ease, transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transform-origin: center;
+}
+
+/* Dấu triện chu sa */
+.ink-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FBF7EE;
+  background: var(--seal);
+  border-radius: 3px;
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+  box-shadow: 0 1px 4px rgba(166,65,46,0.35);
 }
 
 /* ─── 滚动条 ─────────────────────────────────────────────── */
@@ -316,29 +496,29 @@ body {
 }
 
 .star-bright {
-  text-shadow: 0 0 6px rgba(252, 211, 77, 0.55), 0 0 14px rgba(245, 158, 11, 0.3);
+  text-shadow: 0 0 6px rgba(216, 188, 126, 0.5), 0 0 16px rgba(194, 160, 90, 0.26);
   animation: star-twinkle 5.5s ease-in-out infinite;
 }
 .star-normal {
-  text-shadow: 0 0 4px rgba(251, 191, 36, 0.28);
+  text-shadow: 0 0 4px rgba(194, 160, 90, 0.24);
   animation: star-twinkle 7s ease-in-out infinite;
 }
 .star-dim {
-  text-shadow: 0 0 3px rgba(148, 163, 184, 0.22);
+  text-shadow: 0 0 3px rgba(160, 158, 142, 0.2);
   animation: star-twinkle 9s ease-in-out infinite;
 }
 
 /* Rê chuột: quầng sáng bung ra, như chạm vào thì sao hưởng ứng */
 .star-glyph:hover {
   transform: scale(1.12);
-  text-shadow: 0 0 10px rgba(252, 211, 77, 0.9), 0 0 22px rgba(245, 158, 11, 0.55);
+  text-shadow: 0 0 10px rgba(226, 204, 150, 0.85), 0 0 24px rgba(194, 160, 90, 0.5);
   animation-play-state: paused;
 }
 
 /* Sao đang được chọn: giữ quầng sáng, không nhấp nháy nữa */
 .star-active {
   transform: scale(1.1);
-  text-shadow: 0 0 12px rgba(252, 211, 77, 0.95), 0 0 26px rgba(245, 158, 11, 0.6);
+  text-shadow: 0 0 12px rgba(232, 212, 160, 0.9), 0 0 28px rgba(194, 160, 90, 0.55);
   animation-play-state: paused;
 }
 

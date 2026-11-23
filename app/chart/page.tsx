@@ -6,6 +6,7 @@ import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
 import StarDetailPanel from '@/components/StarDetailPanel';
 import StarField from '@/components/StarField';
+import InkMountains from '@/components/InkMountains';
 import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart, Palace, Star } from '@/lib/ziwei/types';
@@ -51,6 +52,10 @@ export default function ChartPage() {
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px', position: 'relative' }}>
       {/* Nền sao nhấp nháy — canvas cố định, không chắn thao tác (pointer-events: none) */}
       <StarField />
+      {/* Viễn sơn rất mờ ở đáy khung nhìn, giữ không khí thuỷ mặc mà không tranh chỗ với lá số */}
+      <div className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <InkMountains height={260} opacity={0.3} water={false} />
+      </div>
 
       <button
         type="button"
