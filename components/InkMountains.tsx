@@ -3,37 +3,78 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 
 /**
- * Sơn thuỷ — viễn sơn và mặt nước, vẽ bằng SVG, có tương tác.
+ * Sơn thuỷ tiên hiệp — núi đá dựng đứng nổi trong sương, lầu các và cầu treo.
  *
- * Ba lớp núi mực loãng dần về xa, dưới chân là mặt nước hắt bóng. Hai cách
- * tương tác:
+ * Khác với đồi thoai thoải: ở đây là các mỏm đá cao, hẹp, chân tan vào sương
+ * nên trông như đang lơ lửng. Sương cắt ngang thành từng tầng, càng xa càng
+ * nhạt, tạo chiều sâu kiểu tranh thuỷ mặc.
  *
- *   · Rê chuột  → các lớp trượt ngang lệch nhau (thị sai). Lớp gần đi nhiều,
- *                 lớp xa gần như đứng yên, nên nhìn vào thấy có chiều sâu
- *                 thay vì một tấm phẳng.
- *   · Bấm nước  → gợn sóng lan ra từ chỗ bấm rồi tắt.
+ * Tương tác:
+ *   · Rê chuột  → các tầng trượt lệch nhau (thị sai), tầng gần đi xa nhất
+ *   · Bấm nước  → gợn sóng lan ra rồi tắt
  *
- * Dùng SVG chứ không dùng ảnh: nhẹ, co giãn mọi bề ngang, đổi màu theo nền
- * sáng/tối mà không cần hai file.
- *
- * Phần núi không bắt chuột; chỉ dải nước bắt, để không chắn nội dung ở trên.
+ * Chỉ dải nước bắt chuột; phần núi để `pointer-events: none` cho khỏi chắn
+ * nội dung phía trên.
  */
 
 interface Ripple {
   id: number;
-  /** Vị trí ngang trong hệ toạ độ SVG 0–1440 */
   x: number;
-  /** Vị trí dọc trong dải nước, 0–1 */
   y: number;
 }
 
 const RIPPLE_MS = 2600;
 const MAX_RIPPLES = 6;
+const VB_W = 1440;
+const VB_H = 460;
+
+/**
+ * Một mỏm núi: sườn cong, đỉnh lệch sang một bên.
+ *
+ * Vẽ bằng đường cong chứ không phải đoạn thẳng — nối nhiều đoạn thẳng đều nhau
+ * sẽ ra hàng rào răng cưa, không ra núi. `lean` đẩy đỉnh lệch khỏi tâm nên hai
+ * sườn không đối xứng, giống đá thật hơn.
+ */
+function peakPath(x: number, w: number, h: number, lean: number, base: number): string {
+  const l = x - w;
+  const r = x + w;
+  const apex = x + lean;
+  const t = base - h;
+  return [
+    `M${l},${base}`,
+    // Vách trái dựng gần như thẳng đứng, chỉ thuôn nhẹ
+    `L${l + w * 0.16},${base - h * 0.52}`,
+    `C${l + w * 0.3},${base - h * 0.76} ${apex - w * 0.52},${base - h * 0.94} ${apex - w * 0.26},${t + h * 0.04}`,
+    // Đỉnh gãy khúc, không nhọn hoắt
+    `L${apex - w * 0.06},${t}`,
+    `L${apex + w * 0.12},${t + h * 0.05}`,
+    `C${apex + w * 0.44},${base - h * 0.9} ${r - w * 0.3},${base - h * 0.72} ${r - w * 0.14},${base - h * 0.48}`,
+    `L${r},${base}`,
+    'Z',
+  ].join(' ');
+}
+
+/** Lầu các mái cong — vẽ ở gốc toạ độ, người gọi tự dịch chuyển và thu phóng */
+function Pavilion({ fill, opacity = 1 }: { fill: string; opacity?: number }) {
+  return (
+    <g fill={fill} opacity={opacity}>
+      {/* Mái dưới, hai đầu đao cong hất lên */}
+      <path d="M-30,0 C-20,-5 -10,-9 0,-10 C10,-9 20,-5 30,0 C22,-2 16,-1 12,1 L-12,1 C-16,-1 -22,-2 -30,0 Z" />
+      {/* Mái trên nhỏ hơn */}
+      <path d="M-17,-11 C-11,-15 -5,-18 0,-19 C5,-18 11,-15 17,-11 C12,-12 9,-12 7,-10 L-7,-10 C-9,-12 -12,-12 -17,-11 Z" />
+      {/* Thân và cột */}
+      <rect x="-9" y="1" width="18" height="9" />
+      <rect x="-11" y="10" width="2.2" height="7" />
+      <rect x="-3" y="10" width="2.2" height="7" />
+      <rect x="5" y="10" width="2.2" height="7" />
+      <rect x="9" y="10" width="2.2" height="7" />
+    </g>
+  );
+}
 
 export default function InkMountains({
-  height = 320,
+  height = 460,
   opacity,
-  /** Bật mặt nước và gợn sóng. Trang lá số tắt đi cho đỡ rối. */
   water = true,
 }: {
   height?: number;
@@ -43,7 +84,6 @@ export default function InkMountains({
   const { theme } = useTheme();
   const dark = theme === 'dark';
 
-  const hostRef = useRef<HTMLDivElement>(null);
   const [shift, setShift] = useState(0);
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const rafRef = useRef<number | null>(null);
@@ -55,8 +95,6 @@ export default function InkMountains({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced.current) return;
 
-    // Thị sai theo vị trí chuột ngang trong khung nhìn, chuẩn hoá về -1..1.
-    // Gộp qua rAF để không tính lại layout mỗi lần chuột nhúc nhích.
     const onMove = (e: PointerEvent) => {
       if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(() => {
@@ -79,88 +117,199 @@ export default function InkMountains({
       ...prev.slice(-(MAX_RIPPLES - 1)),
       {
         id,
-        x: ((e.clientX - box.left) / box.width) * 1440,
+        x: ((e.clientX - box.left) / box.width) * VB_W,
         y: (e.clientY - box.top) / box.height,
       },
     ]);
     setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), RIPPLE_MS);
   }, []);
 
-  // Nền tối: mực ánh bạc trên lụa đen. Nền sáng: mực nho trên giấy.
-  const ink = dark ? '#9FB3A8' : '#2B2721';
-  const layers = [
-    { d: 'M0,214 C120,186 196,158 286,166 C370,173 418,200 498,192 C586,183 636,142 724,148 C806,154 852,192 938,196 C1026,200 1078,166 1164,172 C1252,178 1326,206 1440,198 L1440,320 L0,320 Z', o: dark ? 0.14 : 0.13, blur: 'ink-softer', depth: 6 },
-    { d: 'M0,248 C106,228 170,206 262,214 C348,221 402,248 486,242 C572,236 628,204 712,210 C796,216 846,246 930,250 C1018,254 1076,226 1162,232 C1250,238 1340,258 1440,248 L1440,320 L0,320 Z', o: dark ? 0.22 : 0.2, blur: 'ink-soft', depth: 14 },
-    { d: 'M0,282 C98,268 158,252 248,258 C332,263 388,284 470,280 C556,275 610,252 694,257 C778,262 828,284 912,287 C1000,290 1064,270 1150,274 C1240,278 1346,292 1440,284 L1440,320 L0,320 Z', o: dark ? 0.32 : 0.3, blur: 'ink-soft', depth: 26 },
+  // Tối: xanh xám lạnh như sương núi. Sáng: mực nho pha chút chàm.
+  const ink = dark ? '#A8BCC4' : '#333C42';
+  const waterTop = 404;
+
+  /**
+   * Ba tầng núi. Mỗi tầng là **vài** mỏm rời rạc, cao thấp và rộng hẹp lệch
+   * nhau, đặt thưa để chừa khoảng sương — chứ không phải một dải liền kín
+   * bề ngang. Càng gần thì càng đậm, càng thấp, và trượt nhiều hơn khi rê chuột.
+   *
+   * Mỗi mỏm: [tâm x, nửa bề ngang, chiều cao, độ lệch đỉnh]
+   */
+  const ranges = [
+    {
+      depth: 5,
+      o: dark ? 0.15 : 0.14,
+      blur: 'ink-far',
+      base: 424,
+      peaks: [
+        [96, 34, 236, -10],
+        [298, 26, 296, 8],
+        [452, 42, 198, -6],
+        [726, 30, 278, 12],
+        [980, 48, 216, -14],
+        [1208, 28, 288, 6],
+        [1392, 38, 204, -8],
+      ] as [number, number, number, number][],
+    },
+    {
+      depth: 13,
+      o: dark ? 0.23 : 0.22,
+      blur: 'ink-mid',
+      base: 438,
+      peaks: [
+        [188, 52, 206, 14],
+        [506, 40, 248, -12],
+        [790, 60, 176, 10],
+        [1080, 44, 232, -10],
+        [1340, 56, 188, 8],
+      ] as [number, number, number, number][],
+    },
+    {
+      depth: 26,
+      o: dark ? 0.32 : 0.3,
+      blur: 'ink-near',
+      base: 452,
+      peaks: [
+        [120, 74, 152, -16],
+        [604, 66, 180, 14],
+        [938, 86, 134, -12],
+        [1286, 70, 166, 12],
+      ] as [number, number, number, number][],
+    },
   ];
 
-  const waterTop = 292;
+  /** Sương cắt ngang: chân núi tan vào đây nên các mỏm trông như đang lơ lửng */
+  const mistBands = [
+    { cy: 228, rx: 820, ry: 40, cx: 400, o: dark ? 0.3 : 0.36, cls: 'ink-mist' },
+    { cy: 300, rx: 880, ry: 38, cx: 1040, o: dark ? 0.34 : 0.4, cls: 'ink-mist ink-mist-slow' },
+    { cy: 364, rx: 960, ry: 36, cx: 540, o: dark ? 0.38 : 0.44, cls: 'ink-mist' },
+    { cy: 414, rx: 1040, ry: 30, cx: 880, o: dark ? 0.3 : 0.36, cls: 'ink-mist ink-mist-slow' },
+  ];
 
   return (
     <div
-      ref={hostRef}
       className="absolute inset-x-0 bottom-0 select-none overflow-hidden"
-      style={{ height, opacity: opacity ?? (dark ? 0.78 : 0.62) }}
+      style={{ height, opacity: opacity ?? (dark ? 0.9 : 0.72) }}
     >
-      <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+      <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
         <defs>
-          <filter id="ink-soft" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="7" />
+          <filter id="ink-far" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" />
           </filter>
-          <filter id="ink-softer" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="14" />
+          <filter id="ink-mid" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" />
           </filter>
-          {/* Đỉnh núi nhô ra từ sương: mờ ở trên, rõ dần xuống chân */}
-          <linearGradient id="ink-fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity="0" />
-            <stop offset="34%" stopColor="#fff" stopOpacity="0.72" />
-            <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+          <filter id="ink-near" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1" />
+          </filter>
+          <filter id="ink-fog" x="-30%" y="-60%" width="160%" height="220%">
+            <feGaussianBlur stdDeviation="26" />
+          </filter>
+
+          {/* Đỉnh rõ, chân tan — chính thứ làm núi "nổi" */}
+          <linearGradient id="peak-fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+            <stop offset="58%" stopColor="#fff" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0.12" />
           </linearGradient>
-          <mask id="ink-mask">
-            <rect x="0" y="0" width="1440" height="320" fill="url(#ink-fade)" />
+          <mask id="peak-mask">
+            <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#peak-fade)" />
           </mask>
-          {/* Bóng nước nhạt dần xuống đáy */}
+
           <linearGradient id="water-fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity="0.5" />
+            <stop offset="0%" stopColor="#fff" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
           <mask id="water-mask">
-            <rect x="0" y={waterTop} width="1440" height={320 - waterTop} fill="url(#water-fade)" />
+            <rect x="0" y={waterTop} width={VB_W} height={VB_H - waterTop} fill="url(#water-fade)" />
           </mask>
         </defs>
 
-        {/* ── Núi ── lớp gần trượt nhiều hơn lớp xa */}
-        <g mask="url(#ink-mask)" className="pointer-events-none">
-          {layers.map((l, i) => (
+        {/* ── Núi ── */}
+        <g mask="url(#peak-mask)" className="pointer-events-none">
+          {ranges.map((r, i) => (
             <g
               key={i}
               style={{
-                transform: `translateX(${-shift * l.depth}px)`,
+                transform: `translateX(${-shift * r.depth}px)`,
                 transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
               }}
             >
-              <path d={l.d} fill={ink} opacity={l.o} filter={`url(#${l.blur})`} />
+              <g fill={ink} opacity={r.o} filter={`url(#${r.blur})`}>
+                {r.peaks.map(([px, pw, ph, lean], k) => (
+                  <path key={k} d={peakPath(px, pw, ph, lean, r.base)} />
+                ))}
+              </g>
             </g>
           ))}
+
+          {/* Cầu dài vắt giữa hai mỏm, và lầu các đậu trên đỉnh */}
+          <g
+            style={{
+              transform: `translateX(${-shift * 13}px)`,
+              transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
+            }}
+            opacity={dark ? 0.34 : 0.32}
+          >
+            <path
+              d="M268,232 Q470,200 672,236"
+              fill="none"
+              stroke={ink}
+              strokeWidth="2.4"
+            />
+            {[316, 372, 428, 484, 540, 596].map((x, i) => (
+              <rect key={x} x={x} y={218 + (i % 2) * 3} width="1.6" height="16" fill={ink} />
+            ))}
+            <g transform="translate(268 232) scale(0.72)">
+              <Pavilion fill={ink} />
+            </g>
+            <g transform="translate(672 236) scale(0.66)">
+              <Pavilion fill={ink} />
+            </g>
+          </g>
+
+          <g
+            style={{
+              transform: `translateX(${-shift * 26}px)`,
+              transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
+            }}
+            opacity={dark ? 0.42 : 0.4}
+          >
+            <g transform="translate(1020 300) scale(0.95)">
+              <Pavilion fill={ink} />
+            </g>
+            <g transform="translate(168 372) scale(0.8)">
+              <Pavilion fill={ink} />
+            </g>
+          </g>
         </g>
+
+        {/* ── Sương tầng ── vẽ sau núi để cắt ngang chân các mỏm */}
+        {mistBands.map((m, i) => (
+          <g key={i} className={`${m.cls} pointer-events-none`} opacity={m.o}>
+            <ellipse cx={m.cx} cy={m.cy} rx={m.rx} ry={m.ry} fill={dark ? '#C9D6DA' : '#F3EEE3'} filter="url(#ink-fog)" />
+          </g>
+        ))}
 
         {water && (
           <>
-            {/* ── Mặt nước ── bóng núi lộn ngược, mờ và nhoè */}
             <g mask="url(#water-mask)" className="pointer-events-none">
               <g transform={`translate(0 ${waterTop * 2}) scale(1 -1)`}>
-                {layers.map((l, i) => (
-                  <path key={i} d={l.d} fill={ink} opacity={l.o * 0.55} filter="url(#ink-softer)" />
+                {ranges.map((r, i) => (
+                  <g key={i} fill={ink} opacity={r.o * 0.45} filter="url(#ink-far)">
+                    {r.peaks.map(([px, pw, ph, lean], k) => (
+                      <path key={k} d={peakPath(px, pw, ph, lean, r.base)} />
+                    ))}
+                  </g>
                 ))}
               </g>
-              {/* Vài nét ngang gợi mặt nước lặng */}
-              {[300, 306, 312].map((y, i) => (
+              {[414, 424, 436].map((y, i) => (
                 <line
                   key={y}
-                  x1="0" y1={y} x2="1440" y2={y}
+                  x1="0" y1={y} x2={VB_W} y2={y}
                   stroke={ink}
-                  strokeWidth="0.6"
-                  opacity={0.07}
+                  strokeWidth="0.7"
+                  opacity={0.08}
                   style={{
                     transform: `translateX(${shift * (4 + i * 3)}px)`,
                     transition: 'transform 620ms ease-out',
@@ -169,14 +318,13 @@ export default function InkMountains({
               ))}
             </g>
 
-            {/* Gợn sóng khi bấm */}
             <g className="pointer-events-none">
               {ripples.map(r => (
                 <ellipse
                   key={r.id}
                   className="ink-ripple"
                   cx={r.x}
-                  cy={waterTop + (320 - waterTop) * r.y}
+                  cy={waterTop + (VB_H - waterTop) * r.y}
                   rx="6"
                   ry="2"
                   fill="none"
@@ -186,23 +334,14 @@ export default function InkMountains({
               ))}
             </g>
 
-            {/* Vùng bắt chuột: chỉ dải nước, để không chắn nội dung phía trên */}
             <rect
-              x="0" y={waterTop} width="1440" height={320 - waterTop}
+              x="0" y={waterTop} width={VB_W} height={VB_H - waterTop}
               fill="transparent"
               style={{ cursor: 'pointer', pointerEvents: 'auto' }}
               onPointerDown={addRipple}
             />
           </>
         )}
-
-        {/* Sương vắt ngang sườn núi */}
-        <g className="ink-mist pointer-events-none" opacity={dark ? 0.1 : 0.14}>
-          <ellipse cx="420" cy="238" rx="430" ry="15" fill={ink} filter="url(#ink-softer)" />
-        </g>
-        <g className="ink-mist ink-mist-slow pointer-events-none" opacity={dark ? 0.08 : 0.11}>
-          <ellipse cx="1040" cy="268" rx="380" ry="12" fill={ink} filter="url(#ink-softer)" />
-        </g>
       </svg>
     </div>
   );

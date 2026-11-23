@@ -54,7 +54,7 @@ export default function ChartPage() {
       <StarField />
       {/* Viễn sơn rất mờ ở đáy khung nhìn, giữ không khí thuỷ mặc mà không tranh chỗ với lá số */}
       <div className="fixed inset-x-0 bottom-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <InkMountains height={260} opacity={0.3} water={false} />
+        <InkMountains height={380} opacity={0.26} water={false} />
       </div>
 
       <button
