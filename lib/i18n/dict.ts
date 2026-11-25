@@ -254,6 +254,7 @@ export const UI = {
     vi: 'Phần luận giải dưới đây hiện còn nguyên văn tiếng Trung — chưa dịch.',
     zh: '',
   },
+  'home.seal': { vi: 'TỬ|VI', zh: '紫|微' },
 } as const satisfies Record<string, Entry>;
 
 export type UiKey = keyof typeof UI;

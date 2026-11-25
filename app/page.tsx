@@ -693,20 +693,19 @@ export default function HomePage() {
           {t('home.nav.brand')}
         </div>
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          <button
             onClick={() => router.push('/heming')}
-            className="text-[11px] sm:text-xs px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full transition-all duration-300"
-            style={{ border: `1px solid ${c.navBorder}`, color: c.textMuted }}>
+            className="nav-link text-[11px] sm:text-xs px-1 py-1 tracking-[0.18em]"
+            style={{ color: c.textMuted, ['--nav-rule' as string]: c.navBorder }}>
             {t('home.nav.heming')}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          </button>
+          <span className="mx-1 sm:mx-2 text-[10px]" style={{ color: c.navBorder }}>·</span>
+          <button
             onClick={() => router.push('/chart')}
-            className="text-[11px] sm:text-xs px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full transition-all duration-300"
-            style={{ border: `1px solid ${c.goldLine}`, color: c.goldSolid }}>
+            className="nav-link text-[11px] sm:text-xs px-1 py-1 tracking-[0.18em]"
+            style={{ color: c.goldSolid, ['--nav-rule' as string]: c.goldLine }}>
             {t('home.cta')}
-          </motion.button>
+          </button>
         </div>
       </nav>
 
@@ -714,78 +713,126 @@ export default function HomePage() {
       <section ref={heroRef} className="relative min-h-[82svh] lg:min-h-[92vh] flex flex-col items-center justify-center px-6 z-10 pb-24 pt-10">
         {/* Viễn sơn khép chân màn hero */}
         <InkMountains height={520} />
-        <motion.div style={{ y: heroY, opacity: heroOpacity, maxWidth: '960px' }} className="text-center w-full mx-auto mt-10">
-          {/* 标签行 */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex items-center justify-center gap-3 mb-8">
-            <div className="h-px w-12" style={{ background: `linear-gradient(to right, transparent, ${c.goldLine})` }} />
-            <span className="text-[11px] tracking-[0.45em] transition-colors duration-300" style={{ color: c.tagText }}>
-              {t('home.hero.tag')}
-            </span>
-            <div className="h-px w-12" style={{ background: `linear-gradient(to left, transparent, ${c.goldLine})` }} />
-          </motion.div>
+        <motion.div
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="relative w-full mx-auto mt-6"
+        >
+          <div className="mx-auto w-full max-w-[1100px] px-2 sm:px-6">
+            <div className="flex items-start justify-between gap-8">
+              {/* ── Khối chữ, dồn về trái để chừa khoảng trống bên phải ── */}
+              <div className="min-w-0 flex-1 text-left">
+                <motion.div
+                  initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.7, delay: 0.1 }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <span className="text-[10px] tracking-[0.45em]" style={{ color: c.tagText }}>
+                    {t('home.hero.tag')}
+                  </span>
+                  <div className="h-px flex-1 max-w-[180px]"
+                    style={{ background: `linear-gradient(to right, ${c.goldLine}, transparent)` }} />
+                </motion.div>
 
-          {/* 主标题 */}
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            style={{ position: 'relative', display: 'inline-block' }}>
-            <h1
-              className={`ink-title grad-text ${theme === 'dark' ? 'grad-text-dark' : 'grad-text-light'} font-bold leading-none mb-5`}
-              style={{
-                fontSize: 'clamp(56px, 10vw, 124px)',
-                letterSpacing: '0.07em',
-              }}>
-              {t('home.nav.brand')}
-            </h1>
-          </motion.div>
+                {/* Tiêu đề: mực phẳng, không gradient bóng */}
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="ink-title leading-[0.95] mb-6"
+                  style={{
+                    fontSize: 'clamp(52px, 9.5vw, 128px)',
+                    letterSpacing: '0.04em',
+                    color: c.goldSolid,
+                    fontWeight: 600,
+                  }}
+                >
+                  {t('home.nav.brand')}
+                </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.45 }}
-            className="text-base md:text-lg tracking-[0.18em] mb-2"
-            style={{ color: c.textSecond, fontWeight: 500 }}>
-            {t('home.hero.line1')}
-          </motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.55 }}
-            className="text-xs md:text-sm tracking-[0.3em] mb-6"
-            style={{ color: c.textMuted, opacity: 0.85 }}>
-            {t('home.hero.line2')}
-          </motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.65 }}
-            className="text-sm max-w-xl mx-auto leading-relaxed mb-10"
-            style={{ color: c.textMuted }}>
-            {t('home.hero.sub')}
-          </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="ink-title text-base md:text-xl mb-1.5"
+                  style={{ color: c.textSecond, letterSpacing: '0.06em' }}
+                >
+                  {t('home.hero.line1')}
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  className="text-[11px] md:text-xs tracking-[0.34em] mb-7"
+                  style={{ color: c.textMuted, opacity: 0.8 }}
+                >
+                  {t('home.hero.line2')}
+                </motion.p>
 
-          {/* CTA */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.85 }}
-            className="flex flex-col items-center gap-4">
-            <motion.button
-              whileHover={{ y: -2, filter: 'brightness(1.06)' }} whileTap={{ scale: 0.97 }}
-              onClick={() => router.push('/chart')}
-              className="px-12 py-4 font-semibold text-base tracking-widest rounded-full"
-              style={{ background: c.ctaBg, color: c.ctaText }}>
-              {t('home.cta')}
-            </motion.button>
-          </motion.div>
+                {/* Lạc khoản: tên 14 chính tinh viết liền một dòng, không khung viền */}
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.95 }}
+                  className="max-w-[760px] text-[10px] md:text-[11px] leading-[2.2] mb-10"
+                  style={{ color: c.starText, letterSpacing: '0.16em' }}
+                >
+                  {STARS.map(st => term(st.name)).join('  ·  ')}
+                </motion.p>
 
-          {/* 十四主星 */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ delay: 1.05, duration: 0.8 }}
-            className="mt-12 grid grid-cols-7 gap-1.5 max-w-[540px] mx-auto">
-            {STARS.map((star, i) => (
-              <motion.div key={star.name}
-                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.05 + i * 0.03, duration: 0.35 }}
-                className="flex items-center justify-center px-2 py-1 rounded-full"
-                style={{ background: c.starBg, border: `1px solid ${c.starBorder}` }}>
-                <span className="text-[11px] tracking-wide" style={{ color: c.starText }}>{term(star.name)}</span>
+                {/* Lời mời: chữ cùng một nét bút gạch dưới, không phải viên thuốc */}
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  onClick={() => router.push('/chart')}
+                  className="brush-cta ink-title group relative inline-block pb-2 mt-2"
+                  style={{ color: c.goldSolid, fontSize: '19px', letterSpacing: '0.2em' }}
+                >
+                  {t('home.cta')}
+                  <svg
+                    className="brush-stroke absolute left-0 w-full"
+                    style={{ bottom: -4, height: 10, overflow: 'visible' }}
+                    viewBox="0 0 200 10"
+                    preserveAspectRatio="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M2,7 C34,3.4 62,8.2 96,5.2 C132,2 164,7.4 198,4"
+                      fill="none"
+                      stroke={c.goldSolid}
+                      strokeWidth="2.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </motion.button>
+              </div>
+
+              {/* ── Lạc khoản dọc, treo ngay cạnh tiêu đề như trên tranh ── */}
+              <motion.div
+                initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, delay: 1.1 }}
+                className="hidden md:flex flex-col items-center gap-4 pt-2 shrink-0"
+              >
+                <div className="w-px h-20"
+                  style={{ background: `linear-gradient(to bottom, transparent, ${c.goldLine})` }} />
+                <div
+                  className="ink-seal flex-col leading-none"
+                  style={{ width: 44, height: 44, gap: 1, fontSize: 12.5, paddingTop: 1 }}
+                >
+                  {t('home.seal').split('|').map(line => (
+                    <span key={line}>{line}</span>
+                  ))}
+                </div>
+                <div className="w-px h-10"
+                  style={{ background: `linear-gradient(to top, transparent, ${c.goldLine})` }} />
               </motion.div>
-            ))}
-          </motion.div>
+            </div>
+
+            {/* Một câu duy nhất, đặt thấp và nhỏ, như chú thích dưới tranh */}
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="mt-10 max-w-[520px] text-[12px] leading-relaxed"
+              style={{ color: c.textFaint }}
+            >
+              {t('home.hero.sub')}
+            </motion.p>
+          </div>
         </motion.div>
 
         {/* 滚动提示（绝对定位，不影响 hero opacity 计算） */}
