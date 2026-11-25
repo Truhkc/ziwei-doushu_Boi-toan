@@ -272,53 +272,55 @@ const NI_TEACHINGS: Record<Locale, typeof NI_TEACHINGS_VI> = { vi: NI_TEACHINGS_
 function useColors(theme: Theme) {
   const d = theme === 'dark';
   /**
-   * Bảng màu thuỷ mặc.
+   * Bảng màu "sơn thuỷ huyền ảo & ánh vàng kim".
    *
-   * Tối  = mực nho trên lụa: đen ngả rêu chứ không ngả xanh biển (nền cũ
-   *        #020810 đọc ra "khoa học viễn tưởng", không ra tranh thuỷ mặc).
-   * Sáng = giấy tuyên ngả vàng, chữ mực, nhấn giả thạch.
-   * Vàng kim hạ xuống thành nhũ trầm; chỉ chu sa (dấu triện) được phép rực.
+   * Tối  = bóng tối ngả lam chàm (xanh sương núi lúc chưa rạng), vàng kim bắt
+   *        sáng nổi lên trên. Chàm và vàng bù trừ nhau, nên vàng tự phát sáng
+   *        mà không phải tăng độ chói.
+   * Sáng = giấy tuyên ngả vàng, chữ mực, nhấn kim nâu đủ đậm để đọc được.
+   *
+   * Chữ phụ ở nền tối ngả lam để lùi vào sương; chữ chính giữ chất giấy ấm.
    */
   return {
-    bgBase:       d ? '#0C0E0C'                                : '#F3EEE3',
-    navBg:        d ? '#0C0E0C'                                : '#F3EEE3',
-    navBorder:    d ? 'rgba(239,233,220,0.06)'                 : 'rgba(20,17,13,0.10)',
-    goldGrad:     d ? 'linear-gradient(160deg,#9A7B40 0%,#D8BC7E 42%,#A8894A 72%,#C2A05A 100%)'
+    bgBase:       d ? '#070C11'                                : '#F3EEE3',
+    navBg:        d ? '#070C11'                                : '#F3EEE3',
+    navBorder:    d ? 'rgba(243,236,220,0.06)'                 : 'rgba(20,17,13,0.10)',
+    goldGrad:     d ? 'linear-gradient(160deg,#B9924A 0%,#F4DDA8 38%,#C9A860 68%,#E2C379 100%)'
                     : 'linear-gradient(160deg,#4A3A1E 0%,#8A6B35 42%,#5A4624 72%,#7A5F2E 100%)',
-    goldSolid:    d ? '#C2A05A'                                : '#7A5F2E',
-    goldLine:     d ? 'rgba(194,160,90,0.34)'                  : 'rgba(122,95,46,0.34)',
-    tagText:      d ? 'rgba(194,160,90,0.58)'                  : 'rgba(90,70,36,0.66)',
-    textPrimary:  d ? '#E8E2D4'                                : '#221E18',
-    textSecond:   d ? '#BDB5A4'                                : '#4A4238',
-    textMuted:    d ? '#A49C8B'                                : '#6B6356',
-    textFaint:    d ? 'rgba(232,226,212,0.46)'                 : '#99907F',
-    accent:       d ? '#6E8E86'                                : '#4A6B62',
-    accentSoft:   d ? 'rgba(110,142,134,0.16)'                 : 'rgba(74,107,98,0.10)',
-    cardBg:       d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.86)',
-    cardBorder:   d ? 'rgba(239,233,220,0.09)'                 : 'rgba(20,17,13,0.12)',
+    goldSolid:    d ? '#E2C379'                                : '#7A5F2E',
+    goldLine:     d ? 'rgba(226,195,121,0.36)'                 : 'rgba(122,95,46,0.34)',
+    tagText:      d ? 'rgba(226,195,121,0.60)'                 : 'rgba(90,70,36,0.66)',
+    textPrimary:  d ? '#EDE6D6'                                : '#221E18',
+    textSecond:   d ? '#C3BCAB'                                : '#4A4238',
+    textMuted:    d ? '#9FADB6'                                : '#6B6356',
+    textFaint:    d ? 'rgba(237,230,214,0.46)'                 : '#99907F',
+    accent:       d ? '#6E9EA8'                                : '#4A6B62',
+    accentSoft:   d ? 'rgba(110,158,168,0.16)'                 : 'rgba(74,107,98,0.10)',
+    cardBg:       d ? 'rgba(243,236,220,0.035)'                : 'rgba(251,247,238,0.86)',
+    cardBorder:   d ? 'rgba(243,236,220,0.09)'                 : 'rgba(20,17,13,0.12)',
     cardShadow:   d ? '0 4px 32px rgba(0,0,0,0.45)'            : '0 4px 24px rgba(20,17,13,0.08)',
-    featureBg:    d ? 'rgba(239,233,220,0.03)'                 : 'rgba(251,247,238,0.72)',
-    featureBord:  d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
-    glowTint:     d ? 'rgba(194,160,90,0.055)'                 : 'rgba(154,123,64,0.05)',
-    glowBlue:     d ? 'rgba(110,142,134,0.09)'                 : 'rgba(74,107,98,0.05)',
-    glowPurple:   d ? 'rgba(90,80,70,0.07)'                    : 'rgba(120,100,80,0.035)',
-    niBg:         d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.8)',
-    niBorder:     d ? 'rgba(194,160,90,0.18)'                  : 'rgba(122,95,46,0.22)',
-    niDivider:    d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
-    niCardBg:     d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.88)',
-    niCardBord:   d ? 'rgba(239,233,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    featureBg:    d ? 'rgba(243,236,220,0.03)'                 : 'rgba(251,247,238,0.72)',
+    featureBord:  d ? 'rgba(243,236,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    glowTint:     d ? 'rgba(226,195,121,0.07)'                 : 'rgba(154,123,64,0.05)',
+    glowBlue:     d ? 'rgba(96,140,164,0.10)'                  : 'rgba(74,107,98,0.05)',
+    glowPurple:   d ? 'rgba(72,112,136,0.07)'                  : 'rgba(120,100,80,0.035)',
+    niBg:         d ? 'rgba(243,236,220,0.035)'                : 'rgba(251,247,238,0.8)',
+    niBorder:     d ? 'rgba(226,195,121,0.20)'                 : 'rgba(122,95,46,0.22)',
+    niDivider:    d ? 'rgba(243,236,220,0.07)'                 : 'rgba(20,17,13,0.10)',
+    niCardBg:     d ? 'rgba(243,236,220,0.035)'                : 'rgba(251,247,238,0.88)',
+    niCardBord:   d ? 'rgba(243,236,220,0.07)'                 : 'rgba(20,17,13,0.10)',
     niCardShadow: d ? '0 2px 20px rgba(0,0,0,0.38)'            : '0 2px 16px rgba(20,17,13,0.07)',
-    starBg:       d ? 'rgba(239,233,220,0.035)'                : 'rgba(251,247,238,0.7)',
-    starBorder:   d ? 'rgba(194,160,90,0.2)'                   : 'rgba(122,95,46,0.26)',
-    starText:     d ? 'rgba(194,160,90,0.72)'                  : 'rgba(90,70,36,0.72)',
-    ctaBg:        d ? 'linear-gradient(135deg,#8A6F38,#C2A05A,#8A6F38)'
+    starBg:       d ? 'rgba(243,236,220,0.035)'                : 'rgba(251,247,238,0.7)',
+    starBorder:   d ? 'rgba(226,195,121,0.22)'                 : 'rgba(122,95,46,0.26)',
+    starText:     d ? 'rgba(226,195,121,0.74)'                 : 'rgba(90,70,36,0.72)',
+    ctaBg:        d ? 'linear-gradient(135deg,#A4823C,#E2C379,#A4823C)'
                     : 'linear-gradient(135deg,#4A3A1E,#7A5F2E,#4A3A1E)',
-    ctaText:      d ? '#0C0E0C'                                : '#F7F2E6',
-    footerText:   d ? 'rgba(239,233,220,0.10)'                 : '#B9A478',
-    scrollLine:   d ? 'rgba(194,160,90,0.26)'                  : 'rgba(122,95,46,0.26)',
-    scrollText:   d ? 'rgba(239,233,220,0.14)'                 : '#AE9B74',
-    altSection:   d ? 'rgba(239,233,220,0.018)'                : 'rgba(251,247,238,0.4)',
-    quoteBg:      d ? 'rgba(194,160,90,0.035)'                 : 'rgba(251,247,238,0.9)',
+    ctaText:      d ? '#070C11'                                : '#F7F2E6',
+    footerText:   d ? 'rgba(243,236,220,0.10)'                 : '#B9A478',
+    scrollLine:   d ? 'rgba(226,195,121,0.28)'                 : 'rgba(122,95,46,0.26)',
+    scrollText:   d ? 'rgba(243,236,220,0.14)'                 : '#AE9B74',
+    altSection:   d ? 'rgba(243,236,220,0.018)'                : 'rgba(251,247,238,0.4)',
+    quoteBg:      d ? 'rgba(226,195,121,0.035)'                : 'rgba(251,247,238,0.9)',
   };
 }
 
@@ -670,23 +672,29 @@ export default function HomePage() {
   }, [c.bgBase]);
 
   return (
-    <div style={{ background: c.bgBase, transition: 'background 0.35s ease' }} className="overflow-x-hidden">
+    // Nền lấy từ biến CSS, không lấy từ state React: server luôn dựng sẵn
+    // `dark`, nên nếu tô bằng style thì người quay lại với lựa chọn nền sáng
+    // sẽ thấy trang tối cho tới lúc bấm lại — React không vá chênh lệch
+    // thuộc tính khi hydrate. Script chống nháy đã đặt data-theme từ trước
+    // khi vẽ, nên var(--bg-0) ra đúng màu ngay khung hình đầu.
+    <div style={{ background: 'var(--bg-0)', transition: 'background 0.35s ease' }} className="overflow-x-hidden">
       <StarField />
 
-      {/* 全局光晕 */}
+      {/* Quầng sáng toàn trang. Vệt vàng đặt lệch phải, trên cao — cùng một
+          nguồn sáng với bức sơn thuỷ ở hero; hai vệt chàm còn lại là bóng. */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full"
+        <div className="absolute -top-24 left-[70%] -translate-x-1/2 w-[980px] h-[620px] rounded-full"
           style={{ background: `radial-gradient(ellipse, ${c.glowTint} 0%, transparent 70%)` }} />
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full"
+        <div className="absolute top-1/3 left-[14%] w-96 h-96 rounded-full"
           style={{ background: `radial-gradient(ellipse, ${c.glowBlue} 0%, transparent 70%)` }} />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full"
+        <div className="absolute bottom-1/4 left-[36%] w-80 h-80 rounded-full"
           style={{ background: `radial-gradient(ellipse, ${c.glowPurple} 0%, transparent 70%)` }} />
       </div>
 
       {/* ── 顶部导航 ── nav 与 hero 同色（c.bgBase），无 blur 无 border，彻底无色差带 */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 gap-2"
         style={{
-          background: c.navBg,
+          background: 'var(--bg-0)',
         }}>
         <div className="text-[11px] sm:text-xs tracking-[0.3em] sm:tracking-[0.4em] font-medium transition-colors duration-300 flex-shrink-0"
           style={{ color: c.goldSolid }}>
@@ -733,15 +741,14 @@ export default function HomePage() {
                     style={{ background: `linear-gradient(to right, ${c.goldLine}, transparent)` }} />
                 </motion.div>
 
-                {/* Tiêu đề: mực phẳng, không gradient bóng */}
+                {/* Tiêu đề: phủ nhũ kim, bắt sáng cùng hướng với bức sơn thuỷ */}
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="ink-title leading-[0.95] mb-6"
+                  className="ink-title gold-lit leading-[0.95] mb-6"
                   style={{
                     fontSize: 'clamp(52px, 9.5vw, 128px)',
                     letterSpacing: '0.04em',
-                    color: c.goldSolid,
                     fontWeight: 600,
                   }}
                 >

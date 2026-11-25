@@ -1,20 +1,24 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTheme } from './ThemeProvider';
+import { useTheme } from '@/components/ThemeProvider';
 
 /**
- * Sơn thuỷ tiên hiệp — núi đá dựng đứng nổi trong sương, lầu các và cầu treo.
+ * Sơn thuỷ huyền ảo — ánh vàng kim.
  *
- * Khác với đồi thoai thoải: ở đây là các mỏm đá cao, hẹp, chân tan vào sương
- * nên trông như đang lơ lửng. Sương cắt ngang thành từng tầng, càng xa càng
- * nhạt, tạo chiều sâu kiểu tranh thuỷ mặc.
+ * Dựng theo lối thuỷ mặc thật, không phải đồ hoạ vector:
+ *   · Núi là MẢNG MỰC đặc, bờ răng cưa, mép loang nhoè — không phải hình
+ *     khối trơn có đường viền. Mép loang làm bằng feTurbulence +
+ *     feDisplacementMap, nên mỗi sống núi tự có cái rung của nét bút ướt.
+ *   · Vàng kim không nằm ở đường viền mà nằm ở hai chỗ: lớp núi xa được rửa
+ *     một nước vàng, và tán cây trụi lá trên sống núi.
+ *   · Sương trắng dày, cuộn ngang, nuốt chân núi — chính nó tạo chiều sâu,
+ *     chứ không phải phối cảnh.
  *
  * Tương tác:
- *   · Rê chuột  → các tầng trượt lệch nhau (thị sai), tầng gần đi xa nhất
- *   · Bấm nước  → gợn sóng lan ra rồi tắt
+ *   · Rê chuột → các tầng trượt lệch nhau, tầng gần đi xa nhất
+ *   · Bấm vùng nước → gợn sóng lan ra rồi tắt
  *
- * Chỉ dải nước bắt chuột; phần núi để `pointer-events: none` cho khỏi chắn
- * nội dung phía trên.
+ * Chỉ dải nước bắt chuột; phần còn lại `pointer-events: none`.
  */
 
 interface Ripple {
@@ -28,46 +32,113 @@ const MAX_RIPPLES = 6;
 const VB_W = 1440;
 const VB_H = 460;
 
+/** Nguồn sáng: núi xa phía này được rửa vàng đậm nhất */
+const LIGHT = { x: 1000, y: 96 };
+
 /**
- * Một mỏm núi: sườn cong, đỉnh lệch sang một bên.
- *
- * Vẽ bằng đường cong chứ không phải đoạn thẳng — nối nhiều đoạn thẳng đều nhau
- * sẽ ra hàng rào răng cưa, không ra núi. `lean` đẩy đỉnh lệch khỏi tâm nên hai
- * sườn không đối xứng, giống đá thật hơn.
+ * Trắc diện sống núi, chuẩn hoá về [0,1]×[0,1]. Đỉnh cố ý đặt lệch khỏi tâm.
+ * Đây mới là bộ xương; nét thật được uốn cong ở `smooth()` bên dưới.
  */
-function peakPath(x: number, w: number, h: number, lean: number, base: number): string {
-  const l = x - w;
-  const r = x + w;
-  const apex = x + lean;
-  const t = base - h;
-  return [
-    `M${l},${base}`,
-    // Vách trái dựng gần như thẳng đứng, chỉ thuôn nhẹ
-    `L${l + w * 0.16},${base - h * 0.52}`,
-    `C${l + w * 0.3},${base - h * 0.76} ${apex - w * 0.52},${base - h * 0.94} ${apex - w * 0.26},${t + h * 0.04}`,
-    // Đỉnh gãy khúc, không nhọn hoắt
-    `L${apex - w * 0.06},${t}`,
-    `L${apex + w * 0.12},${t + h * 0.05}`,
-    `C${apex + w * 0.44},${base - h * 0.9} ${r - w * 0.3},${base - h * 0.72} ${r - w * 0.14},${base - h * 0.48}`,
-    `L${r},${base}`,
-    'Z',
-  ].join(' ');
+const RIDGES: number[][][] = [
+  // A — một đỉnh chủ sắc, vai phải thoải dần
+  [[0,0],[0.06,0.20],[0.13,0.15],[0.21,0.41],[0.29,0.32],[0.37,0.63],[0.43,0.54],
+   [0.50,1.00],[0.56,0.70],[0.63,0.79],[0.71,0.46],[0.79,0.54],[0.87,0.26],[0.94,0.32],[1,0]],
+  // B — hai vai, không đỉnh nào áp đảo
+  [[0,0],[0.07,0.31],[0.15,0.23],[0.26,0.56],[0.34,0.45],[0.42,0.71],[0.50,0.57],
+   [0.58,0.87],[0.66,0.61],[0.74,0.68],[0.84,0.35],[0.92,0.43],[1,0]],
+  // C — dải núi răng cưa, đều đỉnh
+  [[0,0],[0.06,0.39],[0.13,0.27],[0.20,0.53],[0.28,0.43],[0.36,0.67],[0.43,0.51],
+   [0.52,0.75],[0.60,0.55],[0.68,0.64],[0.76,0.41],[0.85,0.51],[0.93,0.25],[1,0]],
+  // D — vách dựng, đỉnh dồn về trái
+  [[0,0],[0.05,0.25],[0.12,0.45],[0.18,0.35],[0.25,0.79],[0.31,1.00],[0.38,0.67],
+   [0.46,0.75],[0.54,0.49],[0.62,0.59],[0.72,0.33],[0.82,0.41],[0.91,0.19],[1,0]],
+];
+
+/**
+ * Nối các điểm bằng nét cong kiểu Catmull-Rom, không phải đường gấp khúc.
+ * Đường gấp khúc cho ra răng cưa cứng như đồ hoạ; nét cong giữ đúng vị trí
+ * đỉnh nhưng sườn núi lượn như bút lông kéo qua giấy. `TENSION` thấp thì nét
+ * mềm, cao thì gãy gắt — 0.2 là chỗ còn ra núi mà không ra cánh hoa.
+ */
+const TENSION = 0.2;
+
+function smooth(pts: [number, number][]): string {
+  const f = (n: number) => n.toFixed(1);
+  let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) * TENSION;
+    const c1y = p1[1] + (p2[1] - p0[1]) * TENSION;
+    const c2x = p2[0] - (p3[0] - p1[0]) * TENSION;
+    const c2y = p2[1] - (p3[1] - p1[1]) * TENSION;
+    d += `C${f(c1x)},${f(c1y)} ${f(c2x)},${f(c2y)} ${f(p2[0])},${f(p2[1])}`;
+  }
+  return d;
 }
 
-/** Lầu các mái cong — vẽ ở gốc toạ độ, người gọi tự dịch chuyển và thu phóng */
+function ridgePath(profile: number[][], cx: number, w: number, h: number, base: number): string {
+  const l = cx - w / 2;
+  const pts = profile.map(([px, py]) => [l + px * w, base - py * h] as [number, number]);
+  // Kéo thẳng xuống đáy khung: chân núi tan vào sương nhờ dải mờ, không cần
+  // đường chân — có vẽ cũng bị nuốt hết.
+  return `${smooth(pts)}L${(l + w).toFixed(1)},${VB_H}L${l.toFixed(1)},${VB_H}Z`;
+}
+
+/**
+ * Cây trụi lá, tán rắc vàng. Lá là những chấm nhỏ RẢI THƯA và lệch nhau, cỡ
+ * lẫn độ đậm đều khác nhau — nếu xếp đều thành vòng tròn thì ra cây kẹo mút
+ * chứ không ra cây mùa thu nhìn từ xa.
+ */
+const LEAVES: [number, number, number, number][] = [
+  // x, y, bán kính, độ đậm
+  [-7.6,-15.4,1.1,0.9], [-5.2,-18.8,0.8,0.65], [-3.4,-15.8,1.3,1], [-1.2,-21.2,0.9,0.8],
+  [0.8,-18.4,1.5,1],    [1.6,-23.4,0.7,0.55],  [3.8,-20.2,1.1,0.85], [5.4,-16.4,1.4,1],
+  [7.2,-18.6,0.8,0.6],  [2.6,-14.6,0.9,0.75],  [-6.2,-21,0.7,0.5],
+];
+
+function GoldTree({ trunk, leaf, scale = 1 }: { trunk: string; leaf: string; scale?: number }) {
+  return (
+    <g transform={`scale(${scale})`}>
+      <g stroke={trunk} strokeWidth="0.8" strokeLinecap="round" fill="none" opacity="0.95">
+        <path d="M0,0 C-0.6,-6 0.6,-11 0,-17" />
+        <path d="M0,-8.5 C-3,-11 -5.4,-12.8 -7,-16" />
+        <path d="M0,-11 C2.6,-13.2 4.6,-15 5.8,-17.8" />
+        <path d="M0,-13.5 C-1.8,-16.4 -3.4,-18.4 -4.6,-21" />
+        <path d="M0,-14.5 C1.2,-18 2,-20.4 2.4,-23" />
+      </g>
+      <g fill={leaf}>
+        {LEAVES.map(([x, y, r, o], i) => (
+          <circle key={i} cx={x} cy={y} r={r} opacity={o} />
+        ))}
+      </g>
+    </g>
+  );
+}
+
+/** Lầu các mái đao cong, đứng lẫn trong sương */
 function Pavilion({ fill, opacity = 1 }: { fill: string; opacity?: number }) {
   return (
     <g fill={fill} opacity={opacity}>
-      {/* Mái dưới, hai đầu đao cong hất lên */}
-      <path d="M-30,0 C-20,-5 -10,-9 0,-10 C10,-9 20,-5 30,0 C22,-2 16,-1 12,1 L-12,1 C-16,-1 -22,-2 -30,0 Z" />
-      {/* Mái trên nhỏ hơn */}
-      <path d="M-17,-11 C-11,-15 -5,-18 0,-19 C5,-18 11,-15 17,-11 C12,-12 9,-12 7,-10 L-7,-10 C-9,-12 -12,-12 -17,-11 Z" />
-      {/* Thân và cột */}
-      <rect x="-9" y="1" width="18" height="9" />
-      <rect x="-11" y="10" width="2.2" height="7" />
-      <rect x="-3" y="10" width="2.2" height="7" />
-      <rect x="5" y="10" width="2.2" height="7" />
-      <rect x="9" y="10" width="2.2" height="7" />
+      <path d="M-26,0 C-17,-4 -9,-8 0,-9 C9,-8 17,-4 26,0 C19,-2 14,-1 10,1 L-10,1 C-14,-1 -19,-2 -26,0 Z" />
+      <path d="M-15,-10 C-10,-13 -4,-16 0,-17 C4,-16 10,-13 15,-10 C10,-11 8,-11 6,-9 L-6,-9 C-8,-11 -10,-11 -15,-10 Z" />
+      <rect x="-8" y="1" width="16" height="8" />
+      <rect x="-9.5" y="9" width="2" height="6" />
+      <rect x="-2.5" y="9" width="2" height="6" />
+      <rect x="4.5" y="9" width="2" height="6" />
+      <rect x="8" y="9" width="2" height="6" />
+    </g>
+  );
+}
+
+/** Chim: hai nét bút hình cánh cung */
+function Bird({ stroke, scale = 1 }: { stroke: string; scale?: number }) {
+  return (
+    <g fill="none" stroke={stroke} strokeWidth={1.4 / scale} strokeLinecap="round" transform={`scale(${scale})`}>
+      <path d="M-6,0 C-3.5,-3.4 -1.4,-3.4 0,-0.9" />
+      <path d="M0,-0.9 C1.4,-3.4 3.5,-3.4 6,0" />
     </g>
   );
 }
@@ -124,97 +195,183 @@ export default function InkMountains({
     setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), RIPPLE_MS);
   }, []);
 
-  // Tối: xanh xám lạnh như sương núi. Sáng: mực nho pha chút chàm.
-  const ink = dark ? '#A8BCC4' : '#333C42';
-  const waterTop = 404;
+  const gold = dark ? '#D9B468' : '#C79A3E';
+  const goldHot = dark ? '#F5DFA6' : '#E8C27A';
+  const mist = dark ? '#AFC6D2' : '#FFFFFF';
+  const trunkInk = dark ? '#0A1218' : '#2A3238';
+  const waterTop = 408;
 
   /**
-   * Ba tầng núi. Mỗi tầng là **vài** mỏm rời rạc, cao thấp và rộng hẹp lệch
-   * nhau, đặt thưa để chừa khoảng sương — chứ không phải một dải liền kín
-   * bề ngang. Càng gần thì càng đậm, càng thấp, và trượt nhiều hơn khi rê chuột.
-   *
-   * Mỗi mỏm: [tâm x, nửa bề ngang, chiều cao, độ lệch đỉnh]
+   * Bốn tầng, từ xa tới gần. Núi xa nhạt và được rửa một nước vàng; núi gần
+   * gần như mực nguyên chất. `wash` là độ đậm của nước vàng phủ lên tầng đó.
    */
   const ranges = [
     {
-      depth: 5,
-      o: dark ? 0.15 : 0.14,
-      blur: 'ink-far',
-      base: 424,
-      peaks: [
-        [96, 34, 236, -10],
-        [298, 26, 296, 8],
-        [452, 42, 198, -6],
-        [726, 30, 278, 12],
-        [980, 48, 216, -14],
-        [1208, 28, 288, 6],
-        [1392, 38, 204, -8],
-      ] as [number, number, number, number][],
+      depth: 4,
+      tone: dark ? '#3C5464' : '#B6BFC6',
+      o: dark ? 0.55 : 0.52,
+      wash: dark ? 0.5 : 0.62,
+      blur: 9,
+      base: 392,
+      masses: [
+        { r: 2, cx: 190, w: 560, h: 236 },
+        { r: 0, cx: 690, w: 480, h: 292 },
+        { r: 1, cx: 1130, w: 620, h: 258 },
+        { r: 3, cx: 1430, w: 420, h: 222 },
+      ],
     },
     {
-      depth: 13,
-      o: dark ? 0.23 : 0.22,
-      blur: 'ink-mid',
-      base: 438,
-      peaks: [
-        [188, 52, 206, 14],
-        [506, 40, 248, -12],
-        [790, 60, 176, 10],
-        [1080, 44, 232, -10],
-        [1340, 56, 188, 8],
-      ] as [number, number, number, number][],
+      depth: 10,
+      tone: dark ? '#22394A' : '#79858E',
+      o: dark ? 0.75 : 0.66,
+      wash: dark ? 0.34 : 0.34,
+      blur: 6.5,
+      base: 414,
+      masses: [
+        { r: 1, cx: 60, w: 520, h: 214 },
+        { r: 3, cx: 540, w: 600, h: 268 },
+        { r: 2, cx: 1040, w: 520, h: 198 },
+        { r: 0, cx: 1380, w: 480, h: 250 },
+      ],
     },
     {
-      depth: 26,
-      o: dark ? 0.32 : 0.3,
-      blur: 'ink-near',
-      base: 452,
-      peaks: [
-        [120, 74, 152, -16],
-        [604, 66, 180, 14],
-        [938, 86, 134, -12],
-        [1286, 70, 166, 12],
-      ] as [number, number, number, number][],
+      depth: 19,
+      tone: dark ? '#111F2A' : '#4C565F',
+      o: dark ? 0.9 : 0.82,
+      wash: dark ? 0.16 : 0.14,
+      blur: 4.5,
+      base: 436,
+      masses: [
+        { r: 3, cx: 250, w: 640, h: 212 },
+        { r: 0, cx: 830, w: 540, h: 244 },
+        { r: 2, cx: 1290, w: 580, h: 186 },
+      ],
+    },
+    {
+      depth: 32,
+      tone: dark ? '#050C11' : '#262E35',
+      o: dark ? 1 : 0.94,
+      wash: 0,
+      blur: 2.8,
+      base: 458,
+      masses: [
+        { r: 2, cx: 120, w: 620, h: 164 },
+        { r: 1, cx: 700, w: 700, h: 190 },
+        { r: 3, cx: 1330, w: 560, h: 150 },
+      ],
     },
   ];
 
-  /** Sương cắt ngang: chân núi tan vào đây nên các mỏm trông như đang lơ lửng */
+  /** Cây mọc trên sống núi — x, y, cỡ, và tầng (khớp theo `depth`) */
+  const trees: [number, number, number, number][] = [
+    [206, 296, 1.15, 19], [262, 310, 0.85, 19], [318, 302, 1.0, 19],
+    [742, 318, 1.2, 19], [802, 330, 0.9, 19],
+    [1246, 300, 1.05, 19], [1308, 314, 0.8, 19],
+    [96, 352, 1.3, 32], [152, 364, 0.95, 32],
+    [648, 370, 1.25, 32], [712, 380, 0.9, 32],
+    [1288, 356, 1.1, 32],
+  ];
+
+  /** Sương: dải ngang dày, cuộn rất chậm, nuốt chân từng tầng núi */
   const mistBands = [
-    { cy: 228, rx: 820, ry: 40, cx: 400, o: dark ? 0.3 : 0.36, cls: 'ink-mist' },
-    { cy: 300, rx: 880, ry: 38, cx: 1040, o: dark ? 0.34 : 0.4, cls: 'ink-mist ink-mist-slow' },
-    { cy: 364, rx: 960, ry: 36, cx: 540, o: dark ? 0.38 : 0.44, cls: 'ink-mist' },
-    { cy: 414, rx: 1040, ry: 30, cx: 880, o: dark ? 0.3 : 0.36, cls: 'ink-mist ink-mist-slow' },
+    { cy: 268, rx: 760, ry: 34, cx: 360, o: dark ? 0.2 : 0.52, cls: 'ink-mist' },
+    { cy: 322, rx: 880, ry: 40, cx: 1020, o: dark ? 0.26 : 0.62, cls: 'ink-mist ink-mist-slow' },
+    { cy: 372, rx: 980, ry: 42, cx: 500, o: dark ? 0.3 : 0.72, cls: 'ink-mist' },
+    { cy: 416, rx: 1080, ry: 40, cx: 920, o: dark ? 0.32 : 0.8, cls: 'ink-mist ink-mist-slow' },
+  ];
+
+  /** Bụi vàng: toạ độ và nhịp cố định để không nhảy loạn mỗi lần render */
+  const motes = Array.from({ length: 18 }, (_, i) => {
+    const seed = (i * 97) % 53;
+    return {
+      x: 60 + ((i * 149) % 1320),
+      y: 150 + ((i * 83) % 250),
+      r: 0.8 + (seed % 5) * 0.3,
+      dur: 11 + (seed % 9) * 1.6,
+      delay: (seed % 11) * 0.9,
+    };
+  });
+
+  /** Đàn chim: túm lại một chỗ trên cao bên phải, không rải đều khắp trời */
+  const birds = [
+    { x: 1016, y: 108, s: 1.1, dur: 38, delay: 0 },
+    { x: 1066, y: 92, s: 0.9, dur: 38, delay: 0.8 },
+    { x: 1104, y: 118, s: 0.75, dur: 38, delay: 1.6 },
+    { x: 1148, y: 98, s: 0.85, dur: 38, delay: 2.3 },
+    { x: 1192, y: 126, s: 0.65, dur: 38, delay: 3.1 },
   ];
 
   return (
     <div
       className="absolute inset-x-0 bottom-0 select-none overflow-hidden"
-      style={{ height, opacity: opacity ?? (dark ? 0.9 : 0.72) }}
+      style={{ height, opacity: opacity ?? 1 }}
     >
       <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
         <defs>
-          <filter id="ink-far" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="5" />
+          {/* Mép mực loang: nhiễu đẩy lệch đường biên rồi nhoè nhẹ. Đây là thứ
+              phân biệt mảng mực với hình vector — thiếu nó, núi ra đồ hoạ. */}
+          {ranges.map((r, i) => (
+            <filter key={i} id={`ink-wet-${i}`} x="-25%" y="-30%" width="150%" height="160%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.006 0.015"
+                numOctaves="4"
+                seed={7 + i * 11}
+                result="noise"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="noise"
+                scale={34 - i * 6}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation={r.blur} />
+            </filter>
+          ))}
+
+          {/* Mảng mực nhạt dần xuống chân: núi tan vào sương thay vì kết
+              thúc bằng một khối đặc có mép cứng */}
+          {ranges.map((r, i) => (
+            <linearGradient key={`m${i}`} id={`mass-${i}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={r.tone} stopOpacity="1" />
+              <stop offset="34%"  stopColor={r.tone} stopOpacity="0.94" />
+              <stop offset="72%"  stopColor={r.tone} stopOpacity="0.42" />
+              <stop offset="100%" stopColor={r.tone} stopOpacity="0" />
+            </linearGradient>
+          ))}
+
+          <filter id="fog" x="-30%" y="-80%" width="160%" height="260%">
+            <feGaussianBlur stdDeviation="24" />
           </filter>
-          <filter id="ink-mid" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" />
+          <filter id="glow-soft" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="20" />
           </filter>
-          <filter id="ink-near" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1" />
-          </filter>
-          <filter id="ink-fog" x="-30%" y="-60%" width="160%" height="220%">
-            <feGaussianBlur stdDeviation="26" />
+          <filter id="shaft-blur" x="-40%" y="-20%" width="180%" height="150%">
+            <feGaussianBlur stdDeviation="24" />
           </filter>
 
-          {/* Đỉnh rõ, chân tan — chính thứ làm núi "nổi" */}
-          <linearGradient id="peak-fade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity="1" />
-            <stop offset="58%" stopColor="#fff" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#fff" stopOpacity="0.12" />
+          {/* Quầng sáng sau rặng núi */}
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={goldHot} stopOpacity={dark ? 0.46 : 0.5} />
+            <stop offset="44%" stopColor={gold} stopOpacity={dark ? 0.2 : 0.22} />
+            <stop offset="100%" stopColor={gold} stopOpacity="0" />
+          </radialGradient>
+
+          {/* Nước vàng rửa lên núi xa: đậm nhất phía nguồn sáng, nhạt dần sang
+              trái, tan hẳn ở chân núi nơi sương dày */}
+          <linearGradient id="wash" x1="1" y1="0.1" x2="0" y2="0.9">
+            <stop offset="0%" stopColor={goldHot} stopOpacity="0.95" />
+            <stop offset="34%" stopColor={gold} stopOpacity="0.6" />
+            <stop offset="76%" stopColor={gold} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={gold} stopOpacity="0" />
           </linearGradient>
-          <mask id="peak-mask">
-            <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#peak-fade)" />
-          </mask>
+
+          <linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={goldHot} stopOpacity="0" />
+            <stop offset="18%" stopColor={goldHot} stopOpacity={dark ? 0.12 : 0.08} />
+            <stop offset="100%" stopColor={goldHot} stopOpacity="0" />
+          </linearGradient>
 
           <linearGradient id="water-fade" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#fff" stopOpacity="0.4" />
@@ -225,91 +382,134 @@ export default function InkMountains({
           </mask>
         </defs>
 
-        {/* ── Núi ── */}
-        <g mask="url(#peak-mask)" className="pointer-events-none">
-          {ranges.map((r, i) => (
+        {/* ── Quầng sáng, nằm sau tất cả. Phải nằm trọn trong viewBox: khung
+               ngoài `overflow-hidden`, quầng tràn ra sẽ bị xén thành một vệt
+               thẳng cắt ngang trời. ── */}
+        <ellipse className="pointer-events-none" cx={LIGHT.x} cy={LIGHT.y + 140} rx="600" ry="228" fill="url(#halo)" />
+
+        {/* ── Cột nắng: rất mờ, chỉ để không khí có hạt ── */}
+        <g className="light-shafts pointer-events-none" filter="url(#shaft-blur)">
+          {[-14, 4, 17].map((deg, i) => (
+            <polygon
+              key={deg}
+              points={`${LIGHT.x - 24},${LIGHT.y} ${LIGHT.x + 24},${LIGHT.y} ${LIGHT.x + 150 + i * 30},${VB_H} ${LIGHT.x - 110 - i * 26},${VB_H}`}
+              fill="url(#shaft)"
+              transform={`rotate(${deg} ${LIGHT.x} ${LIGHT.y})`}
+              style={{ animationDelay: `${i * 3.1}s` }}
+            />
+          ))}
+        </g>
+
+        {/* ── Đàn chim, bay trên rặng núi ── */}
+        <g className="pointer-events-none">
+          {birds.map((b, i) => (
+            <g key={i} className="sky-bird" style={{ animationDuration: `${b.dur}s`, animationDelay: `${b.delay}s` }}>
+              <g transform={`translate(${b.x} ${b.y})`}>
+                <Bird stroke={dark ? '#C7B894' : '#55606A'} scale={b.s} />
+              </g>
+            </g>
+          ))}
+        </g>
+
+        {/* ── Núi: mảng mực, xen sương giữa các tầng ── */}
+        {ranges.map((r, i) => (
+          <g key={i} className="pointer-events-none">
             <g
-              key={i}
               style={{
                 transform: `translateX(${-shift * r.depth}px)`,
                 transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
               }}
             >
-              <g fill={ink} opacity={r.o} filter={`url(#${r.blur})`}>
-                {r.peaks.map(([px, pw, ph, lean], k) => (
-                  <path key={k} d={peakPath(px, pw, ph, lean, r.base)} />
-                ))}
+              <g filter={`url(#ink-wet-${i})`}>
+                {/* thân mực */}
+                <g fill={`url(#mass-${i})`} opacity={r.o}>
+                  {r.masses.map((m, k) => (
+                    <path key={k} d={ridgePath(RIDGES[m.r], m.cx, m.w, m.h, r.base)} />
+                  ))}
+                </g>
+                {/* nước vàng rửa lên trên, chỉ ăn vào phần núi */}
+                {r.wash > 0 && (
+                  <g fill="url(#wash)" opacity={r.wash}>
+                    {r.masses.map((m, k) => (
+                      <path key={k} d={ridgePath(RIDGES[m.r], m.cx, m.w, m.h, r.base)} />
+                    ))}
+                  </g>
+                )}
               </g>
-            </g>
-          ))}
 
-          {/* Cầu dài vắt giữa hai mỏm, và lầu các đậu trên đỉnh */}
-          <g
-            style={{
-              transform: `translateX(${-shift * 13}px)`,
-              transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
-            }}
-            opacity={dark ? 0.34 : 0.32}
-          >
-            <path
-              d="M268,232 Q470,200 672,236"
-              fill="none"
-              stroke={ink}
-              strokeWidth="2.4"
-            />
-            {[316, 372, 428, 484, 540, 596].map((x, i) => (
-              <rect key={x} x={x} y={218 + (i % 2) * 3} width="1.6" height="16" fill={ink} />
-            ))}
-            <g transform="translate(268 232) scale(0.72)">
-              <Pavilion fill={ink} />
-            </g>
-            <g transform="translate(672 236) scale(0.66)">
-              <Pavilion fill={ink} />
-            </g>
-          </g>
+              {/* cây mọc trên sống núi của tầng này */}
+              {trees
+                .filter(([, , , d]) => d === r.depth)
+                .map(([x, y, s], k) => (
+                  <g key={k} transform={`translate(${x} ${y})`}>
+                    <GoldTree trunk={trunkInk} leaf={gold} scale={s} />
+                  </g>
+                ))}
 
-          <g
-            style={{
-              transform: `translateX(${-shift * 26}px)`,
-              transition: 'transform 420ms cubic-bezier(0.22,0.61,0.36,1)',
-            }}
-            opacity={dark ? 0.42 : 0.4}
-          >
-            <g transform="translate(1020 300) scale(0.95)">
-              <Pavilion fill={ink} />
+              {/* lầu các: chỉ hai tầng gần, nếu không thì thành đồ chơi rải khắp */}
+              {i === 2 && (
+                <>
+                  <path
+                    d="M300,268 Q520,240 740,272"
+                    fill="none"
+                    stroke={dark ? '#D9B468' : '#5A646E'}
+                    strokeWidth="1.5"
+                    opacity="0.5"
+                  />
+                  <g transform="translate(300 268) scale(0.6)">
+                    <Pavilion fill={trunkInk} opacity={0.85} />
+                  </g>
+                </>
+              )}
+              {i === 3 && (
+                <g transform="translate(1026 338) scale(0.7)">
+                  <Pavilion fill={r.tone} />
+                </g>
+              )}
             </g>
-            <g transform="translate(168 372) scale(0.8)">
-              <Pavilion fill={ink} />
-            </g>
-          </g>
-        </g>
 
-        {/* ── Sương tầng ── vẽ sau núi để cắt ngang chân các mỏm */}
-        {mistBands.map((m, i) => (
-          <g key={i} className={`${m.cls} pointer-events-none`} opacity={m.o}>
-            <ellipse cx={m.cx} cy={m.cy} rx={m.rx} ry={m.ry} fill={dark ? '#C9D6DA' : '#F3EEE3'} filter="url(#ink-fog)" />
+            {/* dải sương chen ngay sau tầng này → chiều sâu do sương, không do
+                phối cảnh */}
+            {mistBands[i] && (
+              <g className={`${mistBands[i].cls} pointer-events-none`} opacity={mistBands[i].o}>
+                <ellipse
+                  cx={mistBands[i].cx} cy={mistBands[i].cy}
+                  rx={mistBands[i].rx} ry={mistBands[i].ry}
+                  fill={mist} filter="url(#fog)"
+                />
+                <ellipse
+                  cx={LIGHT.x} cy={mistBands[i].cy}
+                  rx={mistBands[i].rx * 0.4} ry={mistBands[i].ry}
+                  fill={goldHot} opacity={dark ? 0.3 : 0.26} filter="url(#fog)"
+                />
+              </g>
+            )}
           </g>
         ))}
+
+        {/* ── Bụi vàng ── */}
+        <g className="pointer-events-none" fill={goldHot}>
+          {motes.map((m, i) => (
+            <circle
+              key={i}
+              className="gold-mote"
+              cx={m.x} cy={m.y} r={m.r}
+              style={{ animationDuration: `${m.dur}s`, animationDelay: `${m.delay}s` }}
+            />
+          ))}
+        </g>
 
         {water && (
           <>
             <g mask="url(#water-mask)" className="pointer-events-none">
-              <g transform={`translate(0 ${waterTop * 2}) scale(1 -1)`}>
-                {ranges.map((r, i) => (
-                  <g key={i} fill={ink} opacity={r.o * 0.45} filter="url(#ink-far)">
-                    {r.peaks.map(([px, pw, ph, lean], k) => (
-                      <path key={k} d={peakPath(px, pw, ph, lean, r.base)} />
-                    ))}
-                  </g>
-                ))}
-              </g>
-              {[414, 424, 436].map((y, i) => (
+              <ellipse cx={LIGHT.x} cy={waterTop + 18} rx="150" ry="24" fill={gold} opacity="0.26" filter="url(#glow-soft)" />
+              {[418, 430, 444].map((y, i) => (
                 <line
                   key={y}
                   x1="0" y1={y} x2={VB_W} y2={y}
-                  stroke={ink}
+                  stroke={dark ? '#D9B468' : '#8A939B'}
                   strokeWidth="0.7"
-                  opacity={0.08}
+                  opacity={0.14}
                   style={{
                     transform: `translateX(${shift * (4 + i * 3)}px)`,
                     transition: 'transform 620ms ease-out',
@@ -325,10 +525,9 @@ export default function InkMountains({
                   className="ink-ripple"
                   cx={r.x}
                   cy={waterTop + (VB_H - waterTop) * r.y}
-                  rx="6"
-                  ry="2"
+                  rx="6" ry="2"
                   fill="none"
-                  stroke={ink}
+                  stroke={goldHot}
                   strokeWidth="1.2"
                 />
               ))}

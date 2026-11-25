@@ -54,6 +54,11 @@
   --bg-card: #FBF7EE;
   --bg-page: #F3EEE3;
 
+  /* Vệt kim quét ngang chữ nhan đề — sáng nhất ở 68%, đúng phía nguồn sáng
+     của bức sơn thuỷ bên dưới, nên chữ và cảnh cùng ăn một thứ nắng. */
+  --gold-lit: linear-gradient(100deg, #5A4624 0%, #8A6B35 38%, #B08A3C 68%, #85672F 100%);
+  --gold-halo: rgba(154,123,64,0.18);
+
   /* 圆角 */
   --r-xs:  4px;
   --r-sm:  8px;
@@ -65,26 +70,28 @@
 
 /* ─── 暗色模式 Token 覆盖 ──────────────────────────────── */
 [data-theme="dark"] {
-  /* ─── Tối: mực nho trên lụa, ngả xanh rêu chứ không ngả xanh biển.
-     Nền cũ #020810 đọc ra "vũ trụ khoa học viễn tưởng"; mực thật hơi ấm. ─── */
-  --bg-0: #0C0E0C;
-  --bg-1: #141714;
-  --bg-2: #1E221E;
-  --bg-inv: #EFE9DC;
+  /* ─── Tối: sơn thuỷ huyền ảo. Bóng tối ngả lam chàm — xanh của sương núi
+     lúc chưa rạng — để vàng kim nổi lên như nhũ bắt sáng. Chàm và vàng là
+     cặp bù trừ: đặt cạnh nhau thì vàng tự phát sáng mà không cần chói. ─── */
+  --bg-0: #070C11;
+  --bg-1: #0D151B;
+  --bg-2: #15222A;
+  --bg-inv: #F3ECDC;
 
-  --tx-0: #E8E2D4;
-  --tx-1: #DAD3C3;
-  --tx-2: #A49C8B;
-  --tx-3: #6E675B;
-  --tx-inv: #14110D;
-  --tx-inv2: rgba(20,17,13,0.65);
+  /* Chữ chính giữ chất giấy ấm; chữ phụ ngả lam để lùi vào sương */
+  --tx-0: #EDE6D6;
+  --tx-1: #DCD4C2;
+  --tx-2: #9FADB6;
+  --tx-3: #65757E;
+  --tx-inv: #0A1014;
+  --tx-inv2: rgba(10,16,20,0.65);
 
-  /* Vàng trầm như nhũ trên giấy cũ, không chói */
-  --ac:     #C2A05A;
-  --ac-dim: #D8BC7E;
-  --ac-bg:  rgba(194,160,90,0.10);
-  --ac-bdr: rgba(194,160,90,0.26);
-  --seal:   #C0523C;
+  /* Vàng kim bắt sáng — sáng hơn nhũ trầm cũ một bậc */
+  --ac:     #E2C379;
+  --ac-dim: #F4DDA8;
+  --ac-bg:  rgba(226,195,121,0.10);
+  --ac-bdr: rgba(226,195,121,0.30);
+  --seal:   #C8563E;
 
   --lu:   #6FA98A;
   --quan: #7A9BC9;
@@ -100,8 +107,27 @@
   --sh-md: 0 4px 20px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.35);
   --sh-lg: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
 
-  --bg-card: rgba(239,233,220,0.035);
-  --bg-page: #0C0E0C;
+  --bg-card: rgba(243,236,220,0.035);
+  --bg-page: #070C11;
+
+  --gold-lit: linear-gradient(100deg, #9C7C3E 0%, #E2C379 42%, #FFF0C4 68%, #D4B468 100%);
+  --gold-halo: rgba(232,201,122,0.34);
+}
+
+/* Chữ phủ nhũ: vệt kim quét qua mặt chữ, bên nhận sáng loé lên gần như trắng.
+ *
+ * Không dùng `filter: drop-shadow` để tạo quầng: filter ép phần tử thành một
+ * lớp hợp ảnh riêng, mà lớp thớ giấy ở body lại blend `screen` — nó bỏ qua
+ * đúng khung chữ nhật của lớp đó, để lộ một vệt cắt ngang trời. Quầng sáng
+ * quanh tiêu đề lấy từ vệt sáng toàn trang (đặt ở 70% ngang) là đủ.
+ */
+.gold-lit {
+  background-image: var(--gold-lit);
+  background-size: 180% 100%;
+  background-position: 30% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ─── 全局基础 ───────────────────────────────────────────── */
@@ -155,11 +181,14 @@ body::after {
     radial-gradient(52% 40% at 50% 92%, rgba(20,17,13,0.075), transparent 74%);
   animation: ink-drift 54s ease-in-out infinite alternate;
 }
+/* Tối: nguồn sáng vàng đặt ở 70% ngang, trên cao — đúng chỗ nguồn sáng trong
+   bức sơn thuỷ phía dưới, nên cả trang trông như được rọi từ một điểm. Hai
+   vệt chàm còn lại là bóng, càng xa nguồn sáng càng lạnh. */
 [data-theme="dark"] body::after {
   background:
-    radial-gradient(46% 36% at 18% 20%, rgba(176,196,180,0.055), transparent 70%),
-    radial-gradient(40% 32% at 82% 36%, rgba(194,160,90,0.045),  transparent 72%),
-    radial-gradient(56% 42% at 48% 94%, rgba(150,170,160,0.05),  transparent 74%);
+    radial-gradient(44% 34% at 70% 8%,  rgba(232,201,122,0.10),  transparent 70%),
+    radial-gradient(46% 36% at 14% 26%, rgba(96,140,164,0.055),  transparent 72%),
+    radial-gradient(56% 44% at 42% 96%, rgba(72,112,136,0.06),   transparent 74%);
 }
 
 @keyframes ink-drift {
@@ -262,6 +291,55 @@ body > * { position: relative; z-index: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ink-ripple { display: none; }
+}
+
+/* ═══ Ánh vàng kim ═════════════════════════════════════════
+ * Ba chuyển động rất chậm, cộng lại thành cảm giác "cảnh đang thở":
+ * cột nắng mờ dần rồi sáng lại, chim bay ngang trời, bụi vàng bay lên.
+ * Tất cả đều `pointer-events: none` ở phía SVG, nên không chắn tương tác.
+ */
+
+/* Cột nắng: hơi nghiêng qua lại và đổi độ đậm, như nắng xuyên qua mây mỏng */
+@keyframes shaft-breathe {
+  0%, 100% { opacity: 0.42; transform: scaleX(0.94); }
+  50%      { opacity: 1;    transform: scaleX(1.06); }
+}
+.light-shafts > polygon {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: shaft-breathe 17s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+/* Chim: trôi ngang trời, chao lên xuống rồi mất hút ở rìa tranh */
+@keyframes bird-cross {
+  0%   { opacity: 0; transform: translate(-220px, 26px); }
+  12%  { opacity: 0.85; }
+  50%  { transform: translate(180px, -34px); }
+  84%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(560px, 10px); }
+}
+.sky-bird {
+  animation: bird-cross 32s linear infinite;
+}
+
+/* Bụi vàng: bay lên, lệch ngang, lóe sáng giữa đường rồi tắt */
+@keyframes mote-rise {
+  0%   { opacity: 0; transform: translate(0, 18px) scale(0.6); }
+  18%  { opacity: 0.9; }
+  55%  { opacity: 0.45; transform: translate(14px, -46px) scale(1.15); }
+  100% { opacity: 0; transform: translate(26px, -104px) scale(0.5); }
+}
+.gold-mote {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mote-rise 14s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-shafts > polygon { animation: none; opacity: 0.6; }
+  .sky-bird { animation: none; opacity: 0.7; }
+  .gold-mote { animation: none; opacity: 0.5; }
 }
 
 /* Thiên thể trên nút: trăng khuyết ↔ mặt trời, xoay khi đổi */

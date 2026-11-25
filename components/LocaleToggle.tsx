@@ -1,6 +1,6 @@
 'use client';
 import { useI18n } from './LocaleProvider';
-import { useTheme } from './ThemeProvider';
+import { useTheme } from '@/components/ThemeProvider';
 
 /**
  * Công tắc ngôn ngữ, cố định góc dưới phải.

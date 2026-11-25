@@ -1,6 +1,6 @@
 'use client';
 import { useRef } from 'react';
-import { useTheme } from './ThemeProvider';
+import { useTheme } from '@/components/ThemeProvider';
 import { useI18n } from './LocaleProvider';
 
 /**
