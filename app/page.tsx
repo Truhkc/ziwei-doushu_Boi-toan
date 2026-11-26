@@ -176,6 +176,17 @@ const SECTIONS_VI = [
     href: '/heming',
   },
   {
+    key: 'lich',
+    name: 'Ngày hoàng đạo',
+    en: 'Almanac',
+    desc: 'La bàn chọn ngày · nên kiêng · chọn ngày theo việc',
+    status: 'ready' as const,
+    when: 'Dùng được',
+    icon: '☷',
+    note: '',
+    href: '/lich',
+  },
+  {
     key: 'library',
     name: 'Cổ tịch',
     en: 'Classics',
@@ -210,6 +221,17 @@ const SECTIONS_ZH: typeof SECTIONS_VI = [
     icon: '⊙',
     note: '',
     href: '/heming',
+  },
+  {
+    key: 'lich',
+    name: '黄道吉日',
+    en: 'Almanac',
+    desc: '罗盘择日 · 宜忌 · 按事择日',
+    status: 'ready' as const,
+    when: '可用',
+    icon: '☷',
+    note: '',
+    href: '/lich',
   },
   {
     key: 'library',
@@ -701,6 +723,13 @@ export default function HomePage() {
           {t('home.nav.brand')}
         </div>
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <button
+            onClick={() => router.push('/lich')}
+            className="nav-link text-[11px] sm:text-xs px-1 py-1 tracking-[0.18em]"
+            style={{ color: c.textMuted, ['--nav-rule' as string]: c.navBorder }}>
+            {t('home.nav.lich')}
+          </button>
+          <span className="mx-1 sm:mx-2 text-[10px]" style={{ color: c.navBorder }}>·</span>
           <button
             onClick={() => router.push('/heming')}
             className="nav-link text-[11px] sm:text-xs px-1 py-1 tracking-[0.18em]"

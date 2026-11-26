@@ -143,6 +143,7 @@ export const UI = {
 
   'home.nav.brand': { vi: 'Lá số Tử Vi', zh: '紫微命盘' },
   'home.nav.heming': { vi: 'Hợp bàn', zh: '合盘' },
+  'home.nav.lich': { vi: 'Ngày hoàng đạo', zh: '黄道吉日' },
   'home.cta': { vi: 'Lập lá số', zh: '立即起盘' },
   'home.hero.tag': { vi: 'Tử Vi Đẩu Số · hệ Nghê Hải Hạ', zh: '紫微斗数 · 倪海厦体系' },
   'home.hero.line1': {

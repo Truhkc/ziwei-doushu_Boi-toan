@@ -40,27 +40,26 @@ const LocaleContext = createContext<LocaleCtx>({
   sihua: h => rawSihua(h, DEFAULT_LOCALE),
 });
 
-/**
- * Đọc ngôn ngữ mà script chống-nháy trong app/layout.tsx đã đặt lên <html lang>,
- * để lần render đầu ở client khớp với HTML server trả về.
- */
-function getInitialLocale(): Locale {
-  if (typeof document !== 'undefined') {
-    const lang = document.documentElement.getAttribute('lang');
-    if (lang === 'zh-CN') return 'zh';
-    if (lang === 'vi') return 'vi';
-  }
-  return DEFAULT_LOCALE;
-}
-
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(getInitialLocale);
+  /**
+   * Phải khởi tạo đúng bằng ngôn ngữ server dựng sẵn, không được đọc <html
+   * lang> ở đây. Đọc DOM trong hàm khởi tạo state làm lần render đầu ở client
+   * khác HTML của server; React kêu "hydration failed" rồi giữ nguyên markup
+   * server, nên người đã chọn tiếng Trung quay lại vẫn thấy tiếng Việt cho
+   * tới lúc bấm nút. Đổi trong useEffect thì React vá đầy đủ.
+   */
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem('ziwei-locale');
-    if (saved === 'vi' || saved === 'zh') setLocale(saved);
+    if (saved === 'vi' || saved === 'zh') {
+      setLocale(saved);
+      return;
+    }
+    const lang = document.documentElement.getAttribute('lang');
+    if (lang === 'zh-CN') setLocale('zh');
   }, []);
 
   useEffect(() => {
