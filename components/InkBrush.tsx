@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
+import { BRUSH_EVENT, brushEnabled } from '@/components/BrushToggle';
 
 /**
  * Con chuột là cây bút lông.
@@ -50,7 +51,21 @@ export default function InkBrush() {
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
+  /**
+   * Người dùng có bật bút không. Khởi tạo bằng true cho khớp HTML server,
+   * rồi mới đọc lựa chọn đã lưu — y như các nút khác.
+   */
+  const [enabled, setEnabled] = useState(true);
+
   useEffect(() => {
+    setEnabled(brushEnabled());
+    const onChange = (e: Event) => setEnabled((e as CustomEvent<boolean>).detail);
+    window.addEventListener(BRUSH_EVENT, onChange);
+    return () => window.removeEventListener(BRUSH_EVENT, onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     // Màn cảm ứng không có con trỏ để mà cầm bút; bật lên chỉ tổ tốn pin.
@@ -188,8 +203,11 @@ export default function InkBrush() {
       window.removeEventListener('pointerleave', onLeave);
       window.removeEventListener('blur', onLeave);
       window.removeEventListener('resize', resize);
+      // Tắt giữa chừng thì xoá luôn mực đang còn, đừng để một vệt treo lơ lửng
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
-  }, []);
+  }, [enabled]);
 
   return (
     <canvas
