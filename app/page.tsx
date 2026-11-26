@@ -830,12 +830,21 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* Một câu duy nhất, đặt thấp và nhỏ, như chú thích dưới tranh */}
+            {/* Một câu duy nhất, đặt thấp và nhỏ, như chú thích dưới tranh.
+                Câu này nằm đè lên sương của bức sơn thuỷ, nên không dùng được
+                màu chữ mờ nhất: trên nền sương sáng nó biến mất. Dùng màu chữ
+                phụ, kèm một quầng tối/sáng rất nhẹ sau chữ để tách khỏi tranh
+                mà vẫn không thành cái hộp. */}
             <motion.p
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 1.2 }}
               className="mt-10 max-w-[520px] text-[12px] leading-relaxed"
-              style={{ color: c.textFaint }}
+              style={{
+                color: c.textMuted,
+                textShadow: theme === 'dark'
+                  ? '0 1px 10px rgba(7,12,17,0.9), 0 0 3px rgba(7,12,17,0.8)'
+                  : '0 1px 10px rgba(243,238,227,0.95), 0 0 3px rgba(243,238,227,0.9)',
+              }}
             >
               {t('home.hero.sub')}
             </motion.p>
