@@ -79,6 +79,9 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     return prov ? prov.cities : [];
   }, [form.province]);
 
+  /** Chỉ bày ô thành phố khi thật sự có nhiều hơn một nơi để chọn */
+  const needCity = cityList.length > 1;
+
   const branch = useMemo(() => {
     if (form.unknownTime) return 0;
     return calcTrueSolarBranch(
@@ -302,7 +305,16 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
       {/* ── 出生地点 ── */}
       <div style={{ marginBottom: '16px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>{t('form.place.label')}</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        {/* Tỉnh Việt Nam chỉ có một mục nên không bày ô thành phố: chọn xong
+            tỉnh là xong, khỏi phải bấm thêm một ô chỉ có đúng một lựa chọn.
+            Tỉnh Trung Quốc rộng hơn nhiều, mục con còn ý nghĩa nên vẫn giữ. */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: needCity ? '1fr 1fr' : '1fr',
+            gap: '8px',
+          }}
+        >
           <select
             value={form.province}
             onChange={e => handleProvince(e.target.value)}
@@ -322,19 +334,19 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
               ))}
             </optgroup>
           </select>
-          <select
-            value={form.city}
-            onChange={e => handleCity(e.target.value)}
-            disabled={!form.province}
-            style={{ ...inputStyle, opacity: form.province ? 1 : 0.45 }}
-            onFocus={e => { e.target.style.borderColor = focusBorder; }}
-            onBlur={e => { e.target.style.borderColor = inputBorder; }}
-          >
-            <option value="">{form.province ? t('form.city') : t('form.cityPickProvince')}</option>
-            {cityList.map(c => (
-              <option key={c.name} value={c.name}>{c.name}</option>
-            ))}
-          </select>
+          {needCity && (
+            <select
+              value={form.city}
+              onChange={e => handleCity(e.target.value)}
+              style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = focusBorder; }}
+              onBlur={e => { e.target.style.borderColor = inputBorder; }}
+            >
+              {cityList.map(c => (
+                <option key={c.name} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          )}
         </div>
         <AnimatePresence mode="wait">
           {form.province ? (
