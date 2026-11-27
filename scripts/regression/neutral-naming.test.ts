@@ -4,7 +4,7 @@
  *   允许：《紫微斗数全书》与白话里「文章笔墨」义的成语（如「…精通」「主掌…」「纯靠…」「落在…上」）。
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const NAME = '\u6587\u58a8'; // 两个汉字的品牌简称
 const BANNED: RegExp[] = [
@@ -20,6 +20,9 @@ const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).spli
 const hits: string[] = [];
 for (const f of files) {
   if (BANNED.some((re) => re.test(f))) { hits.push(`${f}（文件名）`); continue; }
+  // git ls-files 读的是索引：删了文件但还没 git add 时，这里会列出已不存在的路径。
+  // 不加这道判断就直接 ENOENT 崩在半路，重构中途跑测试的人只会看到一串堆栈。
+  if (!existsSync(f)) continue;
   const lines = readFileSync(f, 'utf8').split('\n');
   lines.forEach((line, i) => {
     const cleaned = line.replace(IDIOMS, '');

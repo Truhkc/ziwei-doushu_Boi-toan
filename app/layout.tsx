@@ -4,8 +4,8 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { LocaleProvider } from '@/components/LocaleProvider';
 import LocaleToggle from '@/components/LocaleToggle';
 import ThemeOrbToggle from '@/components/ThemeOrbToggle';
-import InkBrush from '@/components/InkBrush';
-import BrushToggle from '@/components/BrushToggle';
+import InkKoi from '@/components/InkKoi';
+import KoiToggle from '@/components/KoiToggle';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_URL } from '@/lib/site';
@@ -50,10 +50,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <ThemeProvider>
           <LocaleProvider>
-            {/* Con chuột là cây bút lông — nằm dưới chữ, không chắn thao tác */}
-            <InkBrush />
+            {/* Con trỏ là một con cá chép; thân đi theo vệt chuột */}
+            <InkKoi />
             {children}
-            <BrushToggle />
+            <KoiToggle />
             <ThemeOrbToggle />
             <LocaleToggle />
           </LocaleProvider>

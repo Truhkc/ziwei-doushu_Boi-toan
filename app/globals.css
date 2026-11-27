@@ -293,6 +293,37 @@ body > * { position: relative; z-index: 1; }
   .ink-ripple { display: none; }
 }
 
+/* ═══ Con trỏ là con cá ════════════════════════════════════
+ * Giấu mũi tên đi để con cá thay chỗ nó. Nhưng CHỈ giấu ở chỗ con trỏ vốn là
+ * mũi tên thường: link, nút, ô nhập vẫn phải giữ con trỏ của chúng, nếu không
+ * người dùng mất sạch dấu hiệu "chỗ này bấm được" hay "chỗ này gõ được".
+ */
+html.koi-cursor,
+html.koi-cursor body {
+  cursor: none;
+}
+html.koi-cursor a,
+html.koi-cursor button,
+html.koi-cursor select,
+html.koi-cursor summary,
+html.koi-cursor label,
+html.koi-cursor [role="button"] {
+  cursor: pointer;
+}
+html.koi-cursor input,
+html.koi-cursor textarea {
+  cursor: text;
+}
+html.koi-cursor input[type="checkbox"],
+html.koi-cursor input[type="radio"],
+html.koi-cursor input[type="date"],
+html.koi-cursor input[type="range"] {
+  cursor: pointer;
+}
+html.koi-cursor :disabled {
+  cursor: not-allowed;
+}
+
 /* ═══ Ánh vàng kim ═════════════════════════════════════════
  * Ba chuyển động rất chậm, cộng lại thành cảm giác "cảnh đang thở":
  * cột nắng mờ dần rồi sáng lại, chim bay ngang trời, bụi vàng bay lên.
