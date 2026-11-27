@@ -15,8 +15,10 @@ export async function generateMetadata({ params }: { params: Promise<{ book: str
   const book = getBookBySlug(slug);
   if (!book) return {};
   return {
-    title: `《${book.title}》· ${book.dynasty} · 紫微斗数古籍原典库`,
+    title: `《${book.title}》· ${book.dynasty} · Cổ tịch Tử Vi Đẩu Số`,
     description: book.intro,
+    alternates: { canonical: `/library/${slug}` },
+    openGraph: { url: `/library/${slug}`, locale: 'vi_VN', type: 'article' },
   };
 }
 

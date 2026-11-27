@@ -13,6 +13,8 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL,
+    // Không khai `host`: Google không đọc dòng này (nó là quy ước của
+    // Yandex), mà để lại thì chỉ thêm một dòng vô nghĩa trong robots.txt.
+    // Việc chỉ định tên miền chuẩn đã do thẻ canonical lo.
   };
 }

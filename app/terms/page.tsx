@@ -1,4 +1,8 @@
-export const metadata = { title: '服务条款 · 紫微命盘', description: '紫微命盘服务条款与用户协议' };
+export const metadata = {
+  title: 'Điều khoản sử dụng | Gieo Quẻ',
+  description: 'Điều khoản sử dụng và thoả thuận người dùng của Gieo Quẻ.',
+  alternates: { canonical: '/terms' },
+};
 
 export default function TermsPage() {
   return (

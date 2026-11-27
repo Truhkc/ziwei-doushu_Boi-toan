@@ -17,8 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ book: str
   const result = getChapter(bookSlug, parseInt(chIdx));
   if (!result) return {};
   return {
-    title: `${result.chapter.title} · 《${result.book.title}》· 紫微斗数古籍`,
-    description: result.chapter.subtitle || `《${result.book.title}》${result.chapter.title}原文`,
+    title: `${result.chapter.title} · 《${result.book.title}》· Cổ tịch Tử Vi`,
+    description: result.chapter.subtitle || `Nguyên văn ${result.chapter.title}, 《${result.book.title}》.`,
+    alternates: { canonical: `/library/${bookSlug}/${chIdx}` },
+    openGraph: { url: `/library/${bookSlug}/${chIdx}`, locale: 'vi_VN', type: 'article' },
   };
 }
 

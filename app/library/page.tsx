@@ -9,8 +9,13 @@ import { ALL_BOOKS, TOTAL_PARAGRAPHS } from '@/lib/classics';
 import LibrarySearch from './LibrarySearch';
 
 export const metadata = {
-  title: '倪师方法论 · 古籍原典库 · 紫微斗数全集 / 全书 / 骨髓赋',
-  description: '紫微斗数权威古籍全文检索：《紫微斗数全集》《紫微斗数全书》《骨髓赋》倪海厦《天纪》引证来源',
+  // Tên sách giữ nguyên chữ Hán vì đó là nhan đề thật của tác phẩm; phần
+  // dẫn dắt để tiếng Việt cho khớp người đọc mà trang hướng tới.
+  title: 'Cổ tịch Tử Vi Đẩu Số · Toàn Thư, Toàn Tập, Cốt Tuỷ Phú | Gieo Quẻ',
+  description:
+    'Kho cổ tịch Tử Vi Đẩu Số, tra toàn văn: 《紫微斗数全集》 Toàn Tập, 《紫微斗数全书》 Toàn Thư, 《骨髓赋》 Cốt Tuỷ Phú — nguồn dẫn chứng của hệ Nghê Hải Hạ.',
+  alternates: { canonical: '/library' },
+  openGraph: { url: '/library', locale: 'vi_VN', type: 'website' },
 };
 
 export default function LibraryHomePage() {

@@ -6,7 +6,12 @@ import Link from 'next/link';
 import { searchClassics, getParagraphById } from '@/lib/classics';
 
 export const metadata = {
-  title: '搜索 · 古籍原典库',
+  title: 'Tra cứu cổ tịch Tử Vi Đẩu Số | Gieo Quẻ',
+  description: 'Tìm toàn văn trong kho cổ tịch Tử Vi Đẩu Số.',
+  // Trang kết quả tra cứu không nên vào chỉ mục: mỗi từ khoá sinh một URL
+  // khác nhau, để Google gom hết thì loãng mất những trang nội dung thật.
+  robots: { index: false, follow: true },
+  alternates: { canonical: '/library/search' },
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
